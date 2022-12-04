@@ -11,20 +11,23 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.bkzalo.databinding.ItemContainerUserBinding;
 import com.example.bkzalo.listeners.UserListener;
-import com.example.bkzalo.models.User;
+import com.example.bkzalo.models.UserModel;
 
 import java.util.List;
 
 public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHolder> {
+    private List<UserModel> users;
 
-    private  final List<User> users;
     private final UserListener userListener;
 
-    public  UsersAdapter(List<User> users, UserListener userListener) {
-        this.users = users;
-        this.userListener = userListener;
+    public  UsersAdapter(UserListener userListener) {
+       this.userListener = userListener;
     }
 
+    public void setData(List<UserModel> userResponseList) {
+        this.users = userResponseList;
+        notifyDataSetChanged();
+    }
     @NonNull
     @Override
     public UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -55,10 +58,10 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
             binding = itemContainerUserBinding;
         }
 
-        void setUserData(User user) {
-            binding.textName.setText(user.name);
-            binding.textEmail.setText(user.email);
-            binding.imageProfile.setImageBitmap(getUserImage(user.image));
+        void setUserData(UserModel user) {
+            binding.textName.setText(user.getTen());
+            binding.textEmail.setText(user.getEmail());
+            binding.imageProfile.setImageBitmap(getUserImage(user.getUrl()));
             binding.getRoot().setOnClickListener(v -> userListener.onUserClicked(user));
         }
     }
@@ -67,4 +70,6 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
         byte[] bytes = android.util.Base64.decode(encodedImage, Base64.DEFAULT);
         return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
     }
+
+
 }

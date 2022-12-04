@@ -11,17 +11,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.bkzalo.databinding.ItemContainerRecentConversionBinding;
 import com.example.bkzalo.listeners.ConversionListener;
-import com.example.bkzalo.models.ChatMessage;
-import com.example.bkzalo.models.User;
+import com.example.bkzalo.models.Chat;
+import com.example.bkzalo.models.UserModel;
 
 import java.util.List;
 
 public class RecentConversionsAdapter extends RecyclerView.Adapter<RecentConversionsAdapter.ConversionViewHolder>{
 
-    private final List<ChatMessage> chatMessages;
+    private final List<Chat> chatMessages;
     private final ConversionListener conversionListener;
 
-    public RecentConversionsAdapter(List<ChatMessage> chatMessages, ConversionListener conversionListener) {
+    public RecentConversionsAdapter(List<Chat> chatMessages, ConversionListener conversionListener) {
         this.chatMessages = chatMessages;
         this.conversionListener = conversionListener;
     }
@@ -56,16 +56,16 @@ public class RecentConversionsAdapter extends RecyclerView.Adapter<RecentConvers
             binding = itemContainerRecentConversionBinding;
         }
 
-        void setData(ChatMessage chatMessage) {
-            binding.imageProfile.setImageBitmap(getConversionImage(chatMessage.conversionImage));
-            binding.textName.setText(chatMessage.conversionName);
-            binding.textRecentMessage.setText(chatMessage.message);
+        void setData(Chat chatMessage) {
+            binding.imageProfile.setImageBitmap(getConversionImage(chatMessage.getConversionImage()));
+            binding.textName.setText(chatMessage.getConversionName());
+            binding.textRecentMessage.setText(chatMessage.getNoidung());
             binding.getRoot().setOnClickListener(v -> {
-                User user = new User();
-                user.id = chatMessage.conversionId;
-                user.name = chatMessage.conversionName;
-                user.image = chatMessage.conversionImage;
-                conversionListener.onConversionClicked(user);
+                UserModel usermodel = new UserModel();
+                usermodel.setId(Long.parseLong(chatMessage.getConversionID()));
+                usermodel.setTen(chatMessage.getConversionName());
+                usermodel.setUrl(chatMessage.getConversionImage());
+                conversionListener.onConversionClicked(usermodel);
             });
         }
     }

@@ -9,20 +9,20 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.bkzalo.databinding.ItemContainerReceivedMessageBinding;
 import com.example.bkzalo.databinding.ItemContainerSentMessageBinding;
-import com.example.bkzalo.models.ChatMessage;
+import com.example.bkzalo.models.Chat;
 
 import java.util.List;
 
 public class ChatAdapter extends  RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
-    private final List<ChatMessage> chatMessages;
+    private final List<Chat> chatMessages;
     private final String senderId;
     private final Bitmap receiverProfileImage;
 
     public static  final int VIEW_TYPE_SENT = 1;
     public static final int VIEW_TYPE_RECEIVED = 2;
 
-    public ChatAdapter(List<ChatMessage> chatMessages, String senderId, Bitmap receiverProfileImage) {
+    public ChatAdapter(List<Chat> chatMessages, String senderId, Bitmap receiverProfileImage) {
         this.chatMessages = chatMessages;
         this.senderId = senderId;
         this.receiverProfileImage = receiverProfileImage;
@@ -66,7 +66,9 @@ public class ChatAdapter extends  RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
     @Override
     public int getItemViewType(int position) {
-        if (chatMessages.get(position).senderId.equals(senderId)) {
+        Long id = chatMessages.get(position).getId_nguoigui();
+        String sender = id.toString();
+        if (sender.equals(senderId)) {
             return VIEW_TYPE_SENT;
         }else {
             return VIEW_TYPE_RECEIVED;
@@ -82,9 +84,9 @@ public class ChatAdapter extends  RecyclerView.Adapter<RecyclerView.ViewHolder>{
             binding = itemContainerSentMessageBinding;
         }
 
-        void setData(ChatMessage chatMessage) {
-            binding.textMessage.setText(chatMessage.message);
-            binding.textDateTime.setText(chatMessage.dateTime);
+        void setData(Chat chatMessage) {
+            binding.textMessage.setText(chatMessage.getNoidung());
+            binding.textDateTime.setText(chatMessage.getThoigiantao());
         }
     }
 
@@ -97,9 +99,9 @@ public class ChatAdapter extends  RecyclerView.Adapter<RecyclerView.ViewHolder>{
             binding = itemContainerReceivedMessageBinding;
         }
 
-        void  setData(ChatMessage chatMessage, Bitmap receiverProfileImage) {
-            binding.textMessage.setText(chatMessage.message);
-            binding.textDateTime.setText(chatMessage.dateTime);
+        void  setData(Chat chatMessage, Bitmap receiverProfileImage) {
+            binding.textMessage.setText(chatMessage.getNoidung());
+            binding.textDateTime.setText(chatMessage.getThoigiantao().toString());
             binding.imageProfile.setImageBitmap(receiverProfileImage);
         }
     }

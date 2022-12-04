@@ -1,7 +1,8 @@
 package com.example.bkzalo.listeners;
 
-import com.example.bkzalo.models.User;
+
+import com.example.bkzalo.models.UserModel;
 
 public interface UserListener {
-    void onUserClicked(User user);
+    void onUserClicked(UserModel user);
 }

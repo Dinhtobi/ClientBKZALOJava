@@ -2,7 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:padding="@dimen/_8sdp">
 
@@ -16,13 +16,11 @@
         app:layout_constraintTop_toTopOf="parent"
         app:riv_oval="true"
         tools:ignore="ImageContrastCheck" />
-
-
     <View
         android:id="@+id/viewSupporter"
         android:layout_width="1dp"
         android:layout_height="1dp"
-        app:layout_constraintBottom_toTopOf="@+id/imageProfile"
+        app:layout_constraintBottom_toBottomOf="@+id/imageProfile"
         app:layout_constraintStart_toEndOf="@+id/imageProfile"
         app:layout_constraintTop_toTopOf="@+id/imageProfile" />
 
@@ -36,9 +34,9 @@
         android:maxLines="1"
         android:textColor="@color/primary_text"
         android:textSize="@dimen/_13ssp"
-        app:layout_constraintEnd_toEndOf="@+id/viewSupporter"
-        app:layout_constraintStart_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageProfile"/>
+        app:layout_constraintBottom_toTopOf="@+id/viewSupporter"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/imageProfile"/>
 
     <TextView
         android:id="@+id/textEmail"
@@ -53,6 +51,4 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/imageProfile"
         app:layout_constraintTop_toBottomOf="@+id/viewSupporter"/>
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,7 +1,7 @@
 package com.example.bkzalo.listeners;
 
-import com.example.bkzalo.models.User;
+import com.example.bkzalo.models.UserModel;
 
 public interface ConversionListener {
-    void onConversionClicked(User user);
+    void onConversionClicked(UserModel user);
 }

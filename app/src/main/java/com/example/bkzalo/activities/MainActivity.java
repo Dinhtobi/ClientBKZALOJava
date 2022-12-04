@@ -12,32 +12,36 @@ import android.util.Base64;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.bkzalo.API.ListBoxMessageAPI;
+import com.example.bkzalo.API.SetOfflineAPI;
+import com.example.bkzalo.API.SetOnlineAPI;
 import com.example.bkzalo.adapters.RecentConversionsAdapter;
 import com.example.bkzalo.listeners.ConversionListener;
-import com.example.bkzalo.models.ChatMessage;
-import com.example.bkzalo.models.User;
-import com.google.firebase.firestore.DocumentChange;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FieldValue;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.messaging.FirebaseMessaging;
+import com.example.bkzalo.models.BoxLastMessage;
+import com.example.bkzalo.models.Chat;
+import com.example.bkzalo.models.UserModel;
 import com.example.bkzalo.databinding.ActivityMainBinding;
 import com.example.bkzalo.utilities.Constants;
 import com.example.bkzalo.utilities.PreferenceManager;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
-public class MainActivity extends BaseActivity implements ConversionListener {
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class MainActivity extends AppCompatActivity implements ConversionListener {
     private ActivityMainBinding binding;
     private PreferenceManager preferenceManager;
-    private List<ChatMessage> conversations;
+    private List<Chat> conversations;
     private RecentConversionsAdapter conversationsAdapter;
-    private FirebaseFirestore database;
-
+    private  Timer timer;
+    private TimerTask task ;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,23 +50,32 @@ public class MainActivity extends BaseActivity implements ConversionListener {
         preferenceManager = new PreferenceManager(getApplicationContext());
         init();
         loadUserDetails();
-        getToken();
+        SetTrangThai();
         setListeners();
-        listenConversations();
+        Reload();
     }
 
     private void init() {
         conversations = new ArrayList<>();
         conversationsAdapter = new RecentConversionsAdapter(conversations, this);
         binding.conversationsRecyclerView.setAdapter(conversationsAdapter);
-        database = FirebaseFirestore.getInstance();
     }
-
+    private void Reload(){
+        timer = new Timer();
+        task = new TimerTask() {
+            @Override
+            public void run() {
+                listenConversations();
+            }
+        };
+        timer.scheduleAtFixedRate(task, 0, 1000);
+    }
     private void setListeners() {
         binding.imageSignOut.setOnClickListener(v -> signOut());
         binding.fabNewChat.setOnClickListener(v -> startActivity(new Intent(getApplicationContext(), UsersActivity.class)));
+        binding.Listgroup.setOnClickListener(v ->startActivity(new Intent(getApplicationContext() , GroupListActivity.class)));
     }
-
+    // load ảnh tên người dùng
     private void loadUserDetails(){
         binding.textName.setText(preferenceManager.getString(Constants.KEY_NAME));
         byte[] bytes = android.util.Base64.decode(preferenceManager.getString(Constants.KEY_IMAGE), Base64.DEFAULT);
@@ -71,100 +84,138 @@ public class MainActivity extends BaseActivity implements ConversionListener {
     }
 
     private void listenConversations() {
-        database.collection(Constants.KEY_COLLECTION_CONVERSATIONS)
-                .whereEqualTo(Constants.KEY_SENDER_ID, preferenceManager.getString(Constants.KEY_USER_ID))
-                .addSnapshotListener(eventListener);
-        database.collection(Constants.KEY_COLLECTION_CONVERSATIONS)
-                .whereEqualTo(Constants.KEY_RECEIVER_ID, preferenceManager.getString(Constants.KEY_USER_ID))
-                .addSnapshotListener(eventListener);
+        BoxLastMessage box1 = new BoxLastMessage();
+        box1.setId_nguoigui(Long.parseLong(preferenceManager.getString(Constants.KEY_USER_ID)));
+        ListBoxMessageAPI.listboxmessageAPI.ListBOX(box1).enqueue(new Callback<List<BoxLastMessage>>() {
+            @Override
+            public void onResponse(Call<List<BoxLastMessage>> call, Response<List<BoxLastMessage>> response) {
+                List<BoxLastMessage> list = response.body();
+                eventListener(list);
+            }
+            @Override
+            public void onFailure(Call<List<BoxLastMessage>> call, Throwable t) {
+                    showToast("Lỗi dữ liệu");
+            }
+        });
+        BoxLastMessage box2 = new BoxLastMessage();
+        box2.setId_nguoinhan(Long.parseLong(preferenceManager.getString(Constants.KEY_USER_ID)));
+        ListBoxMessageAPI.listboxmessageAPI.ListBOX(box2).enqueue(new Callback<List<BoxLastMessage>>() {
+            @Override
+            public void onResponse(Call<List<BoxLastMessage>> call, Response<List<BoxLastMessage>> response) {
+                List<BoxLastMessage> list = response.body();
+                eventListener(list);
+            }
 
+            @Override
+            public void onFailure(Call<List<BoxLastMessage>> call, Throwable t) {
+                showToast("Lỗi dữ liệu");
+            }
+        });
     }
 
     private void  showToast(String message) {
         Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
+    private final void eventListener(List<BoxLastMessage> list) {
 
-    @SuppressLint("NotifyDataSetChanged")
-    private final EventListener<QuerySnapshot> eventListener = (value, error) -> {
-        if (error != null) {
-            return;
-        }
-        if (value != null) {
-            for (DocumentChange documentChange : value.getDocumentChanges()) {
-                if (documentChange.getType() == DocumentChange.Type.ADDED) {
-                    String senderId = documentChange.getDocument().getString(Constants.KEY_SENDER_ID);
-                    String receiverId = documentChange.getDocument().getString(Constants.KEY_RECEIVER_ID);
-                    ChatMessage chatMessage = new ChatMessage();
-                    chatMessage.senderId = senderId;
-                    chatMessage.receiverId = receiverId;
-                    if (preferenceManager.getString(Constants.KEY_USER_ID).equals(senderId)) {
-                        chatMessage.conversionImage = documentChange.getDocument().getString(Constants.KEY_RECEIVER_IMAGE);
-                        chatMessage.conversionName = documentChange.getDocument().getString(Constants.KEY_RECEIVER_NAME);
-                        chatMessage.conversionId = documentChange.getDocument().getString(Constants.KEY_RECEIVER_ID);
-                    }else {
-                        chatMessage.conversionImage = documentChange.getDocument().getString(Constants.KEY_RECEIVER_IMAGE);
-                        chatMessage.conversionName = documentChange.getDocument().getString(Constants.KEY_RECEIVER_NAME);
-                        chatMessage.conversionId = documentChange.getDocument().getString(Constants.KEY_RECEIVER_ID);
-                    }
-                    chatMessage.message = documentChange.getDocument().getString(Constants.KEY_LAST_MESSAGE);
-                    chatMessage.dateObject = documentChange.getDocument().getDate(Constants.KEY_TIMESTAMP);
-                    conversations.add(chatMessage);
-                }else if (documentChange.getType() == DocumentChange.Type.MODIFIED) {
-                    for (int i = 0; i < conversations.size(); i++) {
-                        String senderId = documentChange.getDocument().getString(Constants.KEY_SENDER_ID);
-                        String receiverId = documentChange.getDocument().getString(Constants.KEY_RECEIVER_ID);
-                        if (conversations.get(i).senderId.equals(senderId) && conversations.get(i).receiverId.equals(receiverId)) {
-                            conversations.get(i).message = documentChange.getDocument().getString(Constants.KEY_LAST_MESSAGE);
-                            conversations.get(i).dateObject = documentChange.getDocument().getDate(Constants.KEY_TIMESTAMP);
+        if (list != null) {
+            for(BoxLastMessage i : list){
+                if(CheckConversions(i)){
+                Long senderId = i.getId_nguoigui();
+                Long receiderId = i.getId_nguoinhan();
+                Chat chat = new Chat();
+                chat.setId_nguoigui(senderId);
+                chat.setId_nguoinhan(receiderId);
+                if(preferenceManager.getString(Constants.KEY_USER_ID).equals(senderId.toString())){
+
+                    chat.setConversionID(i.getId_nguoinhan().toString());
+                    chat.setConversionName(i.getTenreceider());
+                    chat.setConversionImage(i.getUrlreceider());
+                }
+                else{
+
+                    chat.setConversionID(i.getId_nguoigui().toString());
+                    chat.setConversionName(i.getTensender());
+                    chat.setConversionImage(i.getUrlsender());
+                }
+                chat.setNoidung(i.getTinnhancuoi());
+                chat.setThoigiantao(i.getThoigiantao());
+                conversations.add(chat);
+            }
+                else{
+                    for(int j = 0 ; j <conversations.size() ; j++){
+                        Long senderid = i.getId_nguoigui();
+                        Long receiderid = i.getId_nguoinhan();
+                        if(conversations.get(j).getId_nguoigui().equals(senderid) && conversations.get(j).getId_nguoinhan().equals(receiderid)){
+                            conversations.get(j).setNoidung(i.getTinnhancuoi());
+                            conversations.get(j).setThoigiantao(i.getThoigiantao());
                             break;
                         }
                     }
                 }
             }
-            Collections.sort(conversations, (obj1, obj2) -> obj2.dateObject.compareTo(obj1.dateObject));
+            Collections.sort(conversations , (obj1 ,obj2) ->obj2.getThoigiantao().compareTo(obj1.getThoigiantao()));
             conversationsAdapter.notifyDataSetChanged();
             binding.conversationsRecyclerView.smoothScrollToPosition(0);
             binding.conversationsRecyclerView.setVisibility(View.VISIBLE);
             binding.progressBar.setVisibility(View.GONE);
         }
-    };
-
-    private void getToken(){
-        FirebaseMessaging.getInstance().getToken().addOnSuccessListener(this::updateToken);
     }
+    private boolean CheckConversions(BoxLastMessage box){
+        boolean add = true;
+        for(int i = 0 ; i < conversations.size(); i++){
+            if(conversations.get(i).getId_nguoigui().equals(box.getId_nguoigui()) && conversations.get(i).getId_nguoinhan().equals(box.getId_nguoinhan())){
+                add = false;
+                break;
+            }
+        }
+        return  add ;
+    }
+    private void SetTrangThai() {
+        UserModel us = new UserModel();
+        us.setId(Long.parseLong(preferenceManager.getString(Constants.KEY_USER_ID)));
+        SetOnlineAPI.setOnlineapi.SetOnl(us)
+                .enqueue(new Callback<UserModel>() {
+                    @Override
+                    public void onResponse(Call<UserModel> call, Response<UserModel> response) {
 
-    private void updateToken(String token) {
-        FirebaseFirestore database = FirebaseFirestore.getInstance();
-        DocumentReference documentReference =
-                database.collection(Constants.KEY_COLLECTION_USERS).document(
-                        preferenceManager.getString(Constants.KEY_USER_ID)
-                );
-        documentReference.update(Constants.KEY_FCM_TOKEN, token)
-                .addOnFailureListener(e -> showToast("Unable to update token"));
+                    }
+
+                    @Override
+                    public void onFailure(Call<UserModel> call, Throwable t) {
+                        showToast("Không thể cập nhật trạng thái");
+                    }
+                });
     }
 
     private void signOut() {
         showToast("Signing out...");
-        FirebaseFirestore database = FirebaseFirestore.getInstance();
-        DocumentReference documentReference =
-                database.collection(Constants.KEY_COLLECTION_USERS).document(
-                        preferenceManager.getString(Constants.KEY_USER_ID)
-                );
-        HashMap<String, Object> updates = new HashMap<>();
-        updates.put(Constants.KEY_FCM_TOKEN, FieldValue.delete());
-        documentReference.update(updates)
-                .addOnSuccessListener(unused -> {
-                    preferenceManager.clear();
-                    startActivity(new Intent(getApplicationContext(), SignInActivity.class));
-                    finish();
-                })
-                .addOnFailureListener(e -> showToast("Unable to sign out"));
+        UserModel us = new UserModel();
+        us.setId(Long.parseLong(preferenceManager.getString(Constants.KEY_USER_ID)));
+        SetOfflineAPI.setoffAPI.Setoff(us)
+                .enqueue(new Callback<UserModel>() {
+                    @Override
+                    public void onResponse(Call<UserModel> call, Response<UserModel> response) {
+                        preferenceManager.clear();
+                        timer.cancel();
+                        task.cancel();
+                        startActivity(new Intent(getApplicationContext(), SignInActivity.class));
+                        finish();
+                    }
+
+                    @Override
+                    public void onFailure(Call<UserModel> call, Throwable t) {
+                        showToast("Thoát thất bại!");
+                    }
+                });
     }
 
+
     @Override
-    public void onConversionClicked(User user) {
+    public void onConversionClicked(UserModel usermodel) {
         Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
-        intent.putExtra(Constants.KEY_USER, user);
+        intent.putExtra(Constants.KEY_USERMODEL, usermodel);
         startActivity(intent);
     }
+
 }

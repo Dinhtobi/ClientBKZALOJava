@@ -15,15 +15,22 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.bkzalo.API.SignupAPI;
 import com.example.bkzalo.databinding.ActivitySignUpBinding;
+import com.example.bkzalo.models.UserModel;
 import com.example.bkzalo.utilities.Constants;
 import com.example.bkzalo.utilities.PreferenceManager;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.ByteArrayOutputStream;
+import java.io.Console;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.HashMap;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class SignUpActivity extends AppCompatActivity {
 
@@ -58,27 +65,32 @@ public class SignUpActivity extends AppCompatActivity {
 
     private void signUp(){
         loading(true);
-        FirebaseFirestore database = FirebaseFirestore.getInstance();
-        HashMap<String, Object> user = new HashMap<>();
-        user.put(Constants.KEY_NAME, binding.inputName.getText().toString());
-        user.put(Constants.KEY_EMAIL, binding.inputEmail.getText().toString());
-        user.put(Constants.KEY_PASSWORD, binding.inputPassword.getText().toString());
-        user.put(Constants.KEY_IMAGE, encodedImage);
-        database.collection(Constants.KEY_COLLECTION_USERS)
-                .add(user)
-                .addOnSuccessListener(documentReference -> {
+        UserModel us = new UserModel();
+        us.setHo("Nguyen");
+        us.setTen(binding.inputName.getText().toString());
+        us.setUrl(encodedImage.toString());
+        us.setEmail(binding.inputPhone.getText().toString());
+        us.setPassword(binding.inputPassword.getText().toString());
+        SignupAPI.signupAPI.sendPost(us)
+                .enqueue(new Callback<UserModel>() {
+                    @Override
+                    public void onResponse(Call<UserModel> call, Response<UserModel> response) {
                     loading(false);
+                    UserModel usrespose = response.body();
                     preferenceManager.putBoolean(Constants.KEY_IS_SIGNED_IN, true);
-                    preferenceManager.putString(Constants.KEY_USER_ID, documentReference.getId());
-                    preferenceManager.putString(Constants.KEY_NAME, binding.inputName.getText().toString());
-                    preferenceManager.putString(Constants.KEY_IMAGE, encodedImage);
-                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                })
-                .addOnFailureListener(exception -> {
-                    loading(false);
-                    showToast(exception.getMessage());
+                        preferenceManager.putString(Constants.KEY_USER_ID, usrespose.getId().toString());
+                        preferenceManager.putString(Constants.KEY_NAME, binding.inputName.getText().toString());
+                        preferenceManager.putString(Constants.KEY_IMAGE, encodedImage);
+                        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                    }
+
+                    @Override
+                    public void onFailure(Call<UserModel> call, Throwable t) {
+                        loading(false);
+                    showToast("Đăng kí không thành công");
+                    }
                 });
     }
 
@@ -111,27 +123,29 @@ public class SignUpActivity extends AppCompatActivity {
             }
     );
 
+    //Check nhập dữ liệu
     private Boolean isValidSignUpDetails(){
         if(encodedImage == null){
-            showToast("Select profile image");
+            showToast("Chọn ảnh");
             return false;
-        }else if(binding.inputName.getText().toString().trim().isEmpty()){
-            showToast("Enter Name");
+        }else
+       if(binding.inputName.getText().toString().trim().isEmpty()){
+            showToast("Nhập Tên");
             return  false;
-        }else if(binding.inputEmail.getText().toString().trim().isEmpty()) {
-            showToast("Enter Email");
+        }else if(binding.inputPhone.getText().toString().trim().isEmpty()) {
+            showToast("Nhập Số Email");
             return false;
-        }else if (!Patterns.EMAIL_ADDRESS.matcher(binding.inputEmail.getText().toString()).matches()) {
-            showToast("Enter valid image");
+        }else if (binding.inputPhone.getText().toString().trim().isEmpty()) {
+            showToast("Nhập số Email");
             return false;
         }else if(binding.inputPassword.getText().toString().trim().isEmpty()) {
-            showToast("Enter password");
+            showToast("Nhập mật khẩu");
             return false;
         }else if(binding.inputConfirmPassword.getText().toString().trim().isEmpty()) {
-            showToast("Confirm your password");
+            showToast("Xác thực lại mật khẩu");
             return false;
         }else if(!binding.inputPassword.getText().toString().equals(binding.inputConfirmPassword.getText().toString())) {
-            showToast("Password & confirm password must be same");
+            showToast("Xác thực sai mật khẩu");
             return false;
         }else {
             return  true;

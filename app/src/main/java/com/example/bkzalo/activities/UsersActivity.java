@@ -4,23 +4,28 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.bkzalo.API.GetUsersAPI;
 import com.example.bkzalo.adapters.UsersAdapter;
 import com.example.bkzalo.databinding.ActivityUsersBinding;
 import com.example.bkzalo.listeners.UserListener;
-import com.example.bkzalo.models.User;
+import com.example.bkzalo.models.UserModel;
 import com.example.bkzalo.utilities.Constants;
 import com.example.bkzalo.utilities.PreferenceManager;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class UsersActivity extends BaseActivity implements UserListener {
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class UsersActivity extends AppCompatActivity implements UserListener {
 
     private ActivityUsersBinding binding;
     private PreferenceManager preferenceManager;
-
+    UsersAdapter usersAdapter;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,50 +33,61 @@ public class UsersActivity extends BaseActivity implements UserListener {
         setContentView(binding.getRoot());
         preferenceManager = new PreferenceManager(getApplicationContext());
         setListeners();
+        usersAdapter = new UsersAdapter(this::onUserClicked);
         getUsers();
+
     }
 
     private void setListeners() {
         binding.imageBack.setOnClickListener(v -> onBackPressed());
     }
-
+    private List<UserModel> users = new ArrayList<>();
     private void getUsers() {
         loading(true);
-        FirebaseFirestore database = FirebaseFirestore.getInstance();
-        database.collection(Constants.KEY_COLLECTION_USERS)
-                .get()
-                .addOnCompleteListener(task -> {
-                    loading(false);
-                    String currentUserId = preferenceManager.getString(Constants.KEY_USER_ID);
-                    if (task.isSuccessful() && task.getResult() != null) {
-                        List<User> users = new ArrayList<>();
-                        for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
-                            if (currentUserId.equals(queryDocumentSnapshot.getId())) {
-                                continue;
-                            }
-                            User user = new User();
-                            user.name = queryDocumentSnapshot.getString(Constants.KEY_NAME);
-                            user.email = queryDocumentSnapshot.getString(Constants.KEY_EMAIL);
-                            user.image = queryDocumentSnapshot.getString(Constants.KEY_IMAGE);
-                            user.token = queryDocumentSnapshot.getString(Constants.KEY_FCM_TOKEN);
-                            user.id = queryDocumentSnapshot.getId();
+
+        GetUsersAPI.getuserapi.GetList().enqueue(new Callback<List<UserModel>>() {
+            @Override
+            public void onResponse(Call<List<UserModel>> call, Response<List<UserModel>> response) {
+                loading(false);
+                List<UserModel> listus = response.body();
+                String currentUserId = preferenceManager.getString(Constants.KEY_USER_ID);
+                if(response.body() != null){
+                    for(int i = 0; i< listus.size(); i++) {
+                        if (!currentUserId.equals(listus.get(i).getId().toString())) {
+                            UserModel user = new UserModel();
+                            user.setTen(listus.get(i).getTen());
+                            user.setEmail(listus.get(i).getEmail());
+                            user.setUrl(listus.get(i).getUrl());
+                            user.setTrangthai(listus.get(i).getTrangthai());
+                            user.setId(listus.get(i).getId());
                             users.add(user);
                         }
-                        if (users.size() > 0) {
-                            UsersAdapter usersAdapter = new UsersAdapter(users, this);
-                            binding.usersRecyclerView.setAdapter(usersAdapter);
-                            binding.usersRecyclerView.setVisibility(View.VISIBLE);
-                        }else {
-                            showErrorMessage();
-                        }
-                    }else {
+
+                    }
+                    if(users.size() > 0 ){
+                        usersAdapter.setData(users);
+                        binding.usersRecyclerView.setAdapter(usersAdapter);
+                        binding.usersRecyclerView.setVisibility(View.VISIBLE);
+                    }
+                    else{
                         showErrorMessage();
                     }
-                });
+                }
+                else{
+                    showErrorMessage();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<UserModel>> call, Throwable t) {
+
+            }
+
+        });
     }
 
     private void showErrorMessage() {
-        binding.textErrorMessage.setText(String.format("%s", "No user available"));
+        binding.textErrorMessage.setText(String.format("%s", "Không có người nào cả"));
         binding.textErrorMessage.setVisibility(View.VISIBLE);
     }
 
@@ -84,9 +100,9 @@ public class UsersActivity extends BaseActivity implements UserListener {
     }
 
     @Override
-    public void onUserClicked(User user) {
+    public void onUserClicked(UserModel UserModel) {
         Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
-        intent.putExtra(Constants.KEY_USER, user);
+        intent.putExtra(Constants.KEY_USERMODEL,  UserModel);
         startActivity(intent);
         finish();
     }

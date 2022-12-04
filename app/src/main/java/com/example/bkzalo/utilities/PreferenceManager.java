@@ -3,6 +3,10 @@ package com.example.bkzalo.utilities;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.example.bkzalo.models.UserModel;
+
+import java.util.List;
+
 public class PreferenceManager {
 
     private final SharedPreferences sharedPreferences;
@@ -26,7 +30,6 @@ public class PreferenceManager {
         editor.putString(key, value);
         editor.apply();
     }
-
     public String getString(String key) {
         return sharedPreferences.getString(key, null);
     }
