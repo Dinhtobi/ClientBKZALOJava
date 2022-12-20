@@ -40,6 +40,7 @@ public class UsersActivity extends AppCompatActivity implements UserListener {
 
     private void setListeners() {
         binding.imageBack.setOnClickListener(v -> onBackPressed());
+
     }
     private List<UserModel> users = new ArrayList<>();
     private void getUsers() {

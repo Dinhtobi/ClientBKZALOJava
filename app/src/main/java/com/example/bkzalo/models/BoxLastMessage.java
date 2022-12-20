@@ -23,6 +23,37 @@ public class BoxLastMessage implements Serializable {
     private String urlsender;
     @SerializedName("urlreceider")
     private String urlreceider;
+    @SerializedName("id_nhomchat")
+    private Long id_nhomchat;
+    @SerializedName("tennhom")
+    private String tennhom ;
+    @SerializedName("image")
+    private String image;
+
+    public String getTennhom() {
+        return tennhom;
+    }
+
+    public void setTennhom(String tennhom) {
+        this.tennhom = tennhom;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+    public Long getId_nhomchat() {
+        return id_nhomchat;
+    }
+
+    public void setId_nhomchat(Long id_nhomchat) {
+        this.id_nhomchat = id_nhomchat;
+    }
+
     private String type;
 
     public String getType() {

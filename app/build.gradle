@@ -53,9 +53,9 @@ dependencies {
 
     implementation 'com.google.gms:google-services:4.3.14'
 
-    // Firebase
-    implementation 'com.google.firebase:firebase-messaging:23.1.0'
-    implementation 'com.google.firebase:firebase-firestore:24.4.0'
+//    // Firebase
+//    implementation 'com.google.firebase:firebase-messaging:23.1.0'
+//    implementation 'com.google.firebase:firebase-firestore:24.4.0'
 
     // MultiDex
     implementation 'androidx.multidex:multidex:2.0.1'

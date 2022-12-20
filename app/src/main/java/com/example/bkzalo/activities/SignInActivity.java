@@ -5,18 +5,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Patterns;
 import android.view.View;
 import android.widget.Toast;
 
 import com.example.bkzalo.API.SignInAPI;
-import com.example.bkzalo.API.SignupAPI;
 import com.example.bkzalo.databinding.ActivitySignInBinding;
 import com.example.bkzalo.models.UserModel;
 import com.example.bkzalo.utilities.Constants;
 import com.example.bkzalo.utilities.PreferenceManager;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
+
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -70,6 +67,8 @@ public class SignInActivity extends AppCompatActivity {
                         preferenceManager.putString(Constants.KEY_USER_ID, userresponse.getId().toString());
                         preferenceManager.putString(Constants.KEY_NAME, userresponse.getTen());
                         preferenceManager.putString(Constants.KEY_IMAGE, userresponse.getUrl());
+                        preferenceManager.putString(Constants.KEY_EMAIL,userresponse.getEmail());
+                        preferenceManager.putString(Constants.KEY_PASSWORD, userresponse.getPassword());
                         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(intent);

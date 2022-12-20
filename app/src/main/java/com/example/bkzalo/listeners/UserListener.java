@@ -5,4 +5,5 @@ import com.example.bkzalo.models.UserModel;
 
 public interface UserListener {
     void onUserClicked(UserModel user);
+
 }

@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:clipToPadding="false"
     android:overScrollMode="never"
-    android:padding="@dimen/_30sdp"
+    android:padding="@dimen/_20sdp"
     android:scrollbars="none"
     tools:context=".activities.SignUpActivity">
 

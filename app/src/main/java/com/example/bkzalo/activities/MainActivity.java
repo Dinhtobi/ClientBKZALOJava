@@ -1,6 +1,5 @@
 package com.example.bkzalo.activities;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -15,14 +14,16 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.bkzalo.API.ListBoxMessageAPI;
+import com.example.bkzalo.API.ListGroupsAPI;
 import com.example.bkzalo.API.SetOfflineAPI;
 import com.example.bkzalo.API.SetOnlineAPI;
 import com.example.bkzalo.adapters.RecentConversionsAdapter;
+import com.example.bkzalo.databinding.ActivityMainBinding;
 import com.example.bkzalo.listeners.ConversionListener;
 import com.example.bkzalo.models.BoxLastMessage;
 import com.example.bkzalo.models.Chat;
+import com.example.bkzalo.models.Group;
 import com.example.bkzalo.models.UserModel;
-import com.example.bkzalo.databinding.ActivityMainBinding;
 import com.example.bkzalo.utilities.Constants;
 import com.example.bkzalo.utilities.PreferenceManager;
 
@@ -72,8 +73,11 @@ public class MainActivity extends AppCompatActivity implements ConversionListene
     }
     private void setListeners() {
         binding.imageSignOut.setOnClickListener(v -> signOut());
-        binding.fabNewChat.setOnClickListener(v -> startActivity(new Intent(getApplicationContext(), UsersActivity.class)));
-        binding.Listgroup.setOnClickListener(v ->startActivity(new Intent(getApplicationContext() , GroupListActivity.class)));
+        binding.fabNewChat.setOnClickListener(v -> UserListClick());
+        binding.Listgroup.setOnClickListener(v ->GroupListClick());
+        binding.imageProfile.setOnClickListener(v ->{
+            ProfileCLick();
+        });
     }
     // load ảnh tên người dùng
     private void loadUserDetails(){
@@ -90,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements ConversionListene
             @Override
             public void onResponse(Call<List<BoxLastMessage>> call, Response<List<BoxLastMessage>> response) {
                 List<BoxLastMessage> list = response.body();
-                eventListener(list);
+                if(list != null)   ConversionBox(list);
             }
             @Override
             public void onFailure(Call<List<BoxLastMessage>> call, Throwable t) {
@@ -103,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements ConversionListene
             @Override
             public void onResponse(Call<List<BoxLastMessage>> call, Response<List<BoxLastMessage>> response) {
                 List<BoxLastMessage> list = response.body();
-                eventListener(list);
+                if(list != null)   ConversionBox(list);
             }
 
             @Override
@@ -111,48 +115,106 @@ public class MainActivity extends AppCompatActivity implements ConversionListene
                 showToast("Lỗi dữ liệu");
             }
         });
+        UserModel user = new UserModel();
+        user.setId(Long.parseLong(preferenceManager.getString(Constants.KEY_USER_ID)));
+        ListGroupsAPI.listGroupsApi.listgroup(user).enqueue(new Callback<List<Group>>() {
+            @Override
+            public void onResponse(Call<List<Group>> call, Response<List<Group>> response) {
+                List<Group> list = response.body();
+                for(Group i : list){
+                    BoxLastMessage box3 = new BoxLastMessage();
+                    box3.setId_nhomchat(i.getId_nhomchat());
+                    ListBoxMessageAPI.listboxmessageAPI.ListBOX(box3).enqueue(new Callback<List<BoxLastMessage>>() {
+                        @Override
+                        public void onResponse(Call<List<BoxLastMessage>> call, Response<List<BoxLastMessage>> response) {
+                            List<BoxLastMessage> list = response.body();
+                            if(list != null)   ConversionBox(list);
+                        }
+
+                        @Override
+                        public void onFailure(Call<List<BoxLastMessage>> call, Throwable t) {
+                            showToast("Lỗi dữ liệu");
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Group>> call, Throwable t) {
+
+            }
+        });
     }
 
     private void  showToast(String message) {
         Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
-    private final void eventListener(List<BoxLastMessage> list) {
+    private final void ConversionBox(List<BoxLastMessage> list) {
 
-        if (list != null) {
+        if (list.size() != 0) {
             for(BoxLastMessage i : list){
-                if(CheckConversions(i)){
-                Long senderId = i.getId_nguoigui();
-                Long receiderId = i.getId_nguoinhan();
-                Chat chat = new Chat();
-                chat.setId_nguoigui(senderId);
-                chat.setId_nguoinhan(receiderId);
-                if(preferenceManager.getString(Constants.KEY_USER_ID).equals(senderId.toString())){
+                  if(i.getId_nhomchat() != 0L){
+                          if(CheckConversions(i)){
+                                Long senderid = i.getId_nguoigui();
+                                Long id_nhomchat = i.getId_nhomchat();
+                                Chat chat = new Chat();
+                                chat.setId_nhomchat(id_nhomchat);
+                                chat.setId_nguoigui(senderid);
+                                chat.setId_nguoinhan(0L);
+                                chat.setConversionID(id_nhomchat.toString());
+                                chat.setConversionName(i.getTennhom());
+                                chat.setConversionImage(i.getImage());
+                                chat.setNoidung(i.getTinnhancuoi());
+                                chat.setThoigiantao(i.getThoigiantao());
+                                conversations.add(chat);
 
-                    chat.setConversionID(i.getId_nguoinhan().toString());
-                    chat.setConversionName(i.getTenreceider());
-                    chat.setConversionImage(i.getUrlreceider());
-                }
-                else{
-
-                    chat.setConversionID(i.getId_nguoigui().toString());
-                    chat.setConversionName(i.getTensender());
-                    chat.setConversionImage(i.getUrlsender());
-                }
-                chat.setNoidung(i.getTinnhancuoi());
-                chat.setThoigiantao(i.getThoigiantao());
-                conversations.add(chat);
-            }
-                else{
-                    for(int j = 0 ; j <conversations.size() ; j++){
-                        Long senderid = i.getId_nguoigui();
-                        Long receiderid = i.getId_nguoinhan();
-                        if(conversations.get(j).getId_nguoigui().equals(senderid) && conversations.get(j).getId_nguoinhan().equals(receiderid)){
-                            conversations.get(j).setNoidung(i.getTinnhancuoi());
-                            conversations.get(j).setThoigiantao(i.getThoigiantao());
-                            break;
+                            }else{
+                                for(int j = 0 ; j <conversations.size() ; j++){
+                                    Long senderid = i.getId_nguoigui();
+                            Long id_nhomchat = i.getId_nhomchat();
+                            if(conversations.get(j).getId_nguoigui().equals(senderid) && conversations.get(j).getId_nhomchat().equals(id_nhomchat)){
+                                conversations.get(j).setNoidung(i.getTinnhancuoi());
+                                conversations.get(j).setThoigiantao(i.getThoigiantao());
+                                break;
+                            }
                         }
                     }
-                }
+              }else{
+                  if(CheckConversions(i)){
+                      Long senderId = i.getId_nguoigui();
+                      Long receiderId = i.getId_nguoinhan();
+                      Chat chat = new Chat();
+                      chat.setId_nguoigui(senderId);
+                      chat.setId_nguoinhan(receiderId);
+                      chat.setId_nhomchat(i.getId_nhomchat());
+                      if(preferenceManager.getString(Constants.KEY_USER_ID).equals(senderId.toString())){
+
+                          chat.setConversionID(i.getId_nguoinhan().toString());
+                          chat.setConversionName(i.getTenreceider());
+                          chat.setConversionImage(i.getUrlreceider());
+                      }
+                      else{
+
+                          chat.setConversionID(i.getId_nguoigui().toString());
+                          chat.setConversionName(i.getTensender());
+                          chat.setConversionImage(i.getUrlsender());
+                      }
+                      chat.setNoidung(i.getTinnhancuoi());
+                      chat.setThoigiantao(i.getThoigiantao());
+                      conversations.add(chat);
+                  }
+                  else{
+                      for(int j = 0 ; j <conversations.size() ; j++){
+                          Long senderid = i.getId_nguoigui();
+                          Long receiderid = i.getId_nguoinhan();
+                          if(conversations.get(j).getId_nguoigui().equals(senderid) && conversations.get(j).getId_nguoinhan().equals(receiderid)){
+                              conversations.get(j).setNoidung(i.getTinnhancuoi());
+                              conversations.get(j).setThoigiantao(i.getThoigiantao());
+                              break;
+                          }
+                      }
+                  }
+              }
             }
             Collections.sort(conversations , (obj1 ,obj2) ->obj2.getThoigiantao().compareTo(obj1.getThoigiantao()));
             conversationsAdapter.notifyDataSetChanged();
@@ -163,10 +225,19 @@ public class MainActivity extends AppCompatActivity implements ConversionListene
     }
     private boolean CheckConversions(BoxLastMessage box){
         boolean add = true;
-        for(int i = 0 ; i < conversations.size(); i++){
-            if(conversations.get(i).getId_nguoigui().equals(box.getId_nguoigui()) && conversations.get(i).getId_nguoinhan().equals(box.getId_nguoinhan())){
-                add = false;
-                break;
+        if(box.getId_nhomchat() !=0L){
+            for(int i = 0 ; i < conversations.size(); i++){
+                if(conversations.get(i).getId_nhomchat().equals(box.getId_nhomchat())){
+                    add = false;
+                    break;
+                }
+            }
+        }else{
+            for(int i = 0 ; i < conversations.size(); i++){
+                if(conversations.get(i).getId_nguoigui().equals(box.getId_nguoigui()) && conversations.get(i).getId_nguoinhan().equals(box.getId_nguoinhan())){
+                    add = false;
+                    break;
+                }
             }
         }
         return  add ;
@@ -212,10 +283,36 @@ public class MainActivity extends AppCompatActivity implements ConversionListene
 
 
     @Override
-    public void onConversionClicked(UserModel usermodel) {
+    public void onConversionUserClicked(UserModel usermodel) {
         Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
         intent.putExtra(Constants.KEY_USERMODEL, usermodel);
         startActivity(intent);
+    }
+
+    @Override
+    public void onConversionGroupClicked(Group group) {
+        Intent intent = new Intent(getApplicationContext(), GroupChatActivities.class);
+        intent.putExtra(Constants.KEY_GROUP, group);
+        startActivity(intent);
+    }
+
+    public void GroupListClick(){
+        Intent intent = new Intent(getApplicationContext(), GroupListActivity.class);
+        startActivity(intent);
+    }
+    public void UserListClick(){
+        Intent intent = new Intent(getApplicationContext(), UsersActivity.class);
+        startActivity(intent);
+    }
+    public void ProfileCLick(){
+        Intent intent = new Intent(getApplicationContext(), ProfileUserActivity.class);
+        startActivity(intent);
+
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadUserDetails();
     }
 
 }

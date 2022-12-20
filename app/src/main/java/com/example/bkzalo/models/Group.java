@@ -1,11 +1,18 @@
 package com.example.bkzalo.models;
 
+import com.google.gson.annotations.SerializedName;
+
+import java.io.Serializable;
 import java.util.List;
 
-public class Group {
+public class Group implements Serializable {
+    @SerializedName("id_nguoitao")
     private Long id_nguoitao;
+    @SerializedName("tennhom")
     private String tennhom ;
+    @SerializedName("id_nhomchat")
     private Long id_nhomchat;
+    @SerializedName("image")
     private String image;
 
 

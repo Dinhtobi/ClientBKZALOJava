@@ -7,7 +7,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Base64;
-import android.util.Patterns;
 import android.view.View;
 import android.widget.Toast;
 
@@ -15,18 +14,15 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.bkzalo.API.SignupAPI;
+import com.example.bkzalo.API.UserAPI;
 import com.example.bkzalo.databinding.ActivitySignUpBinding;
 import com.example.bkzalo.models.UserModel;
 import com.example.bkzalo.utilities.Constants;
 import com.example.bkzalo.utilities.PreferenceManager;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.ByteArrayOutputStream;
-import java.io.Console;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.HashMap;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -66,12 +62,11 @@ public class SignUpActivity extends AppCompatActivity {
     private void signUp(){
         loading(true);
         UserModel us = new UserModel();
-        us.setHo("Nguyen");
         us.setTen(binding.inputName.getText().toString());
-        us.setUrl(encodedImage.toString());
+        us.setUrl(encodedImage);
         us.setEmail(binding.inputPhone.getText().toString());
         us.setPassword(binding.inputPassword.getText().toString());
-        SignupAPI.signupAPI.sendPost(us)
+        UserAPI.userAPI.sendPost(us)
                 .enqueue(new Callback<UserModel>() {
                     @Override
                     public void onResponse(Call<UserModel> call, Response<UserModel> response) {
@@ -81,6 +76,8 @@ public class SignUpActivity extends AppCompatActivity {
                         preferenceManager.putString(Constants.KEY_USER_ID, usrespose.getId().toString());
                         preferenceManager.putString(Constants.KEY_NAME, binding.inputName.getText().toString());
                         preferenceManager.putString(Constants.KEY_IMAGE, encodedImage);
+                        preferenceManager.putString(Constants.KEY_EMAIL,usrespose.getEmail());
+                        preferenceManager.putString(Constants.KEY_PASSWORD, usrespose.getPassword());
                         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(intent);

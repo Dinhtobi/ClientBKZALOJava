@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.bkzalo.databinding.ItemContainerRecentConversionBinding;
 import com.example.bkzalo.listeners.ConversionListener;
 import com.example.bkzalo.models.Chat;
+import com.example.bkzalo.models.Group;
 import com.example.bkzalo.models.UserModel;
 
 import java.util.List;
@@ -60,13 +61,23 @@ public class RecentConversionsAdapter extends RecyclerView.Adapter<RecentConvers
             binding.imageProfile.setImageBitmap(getConversionImage(chatMessage.getConversionImage()));
             binding.textName.setText(chatMessage.getConversionName());
             binding.textRecentMessage.setText(chatMessage.getNoidung());
-            binding.getRoot().setOnClickListener(v -> {
-                UserModel usermodel = new UserModel();
-                usermodel.setId(Long.parseLong(chatMessage.getConversionID()));
-                usermodel.setTen(chatMessage.getConversionName());
-                usermodel.setUrl(chatMessage.getConversionImage());
-                conversionListener.onConversionClicked(usermodel);
-            });
+            if(chatMessage.getId_nhomchat() != 0L){
+                binding.getRoot().setOnClickListener(v -> {
+                    Group group = new Group();
+                    group.setId_nhomchat(chatMessage.getId_nhomchat());
+                    group.setTennhom(chatMessage.getConversionName());
+                    group.setImage(chatMessage.getConversionImage());
+                    conversionListener.onConversionGroupClicked(group);
+                });
+            }else{
+                binding.getRoot().setOnClickListener(v -> {
+                    UserModel usermodel = new UserModel();
+                    usermodel.setId(Long.parseLong(chatMessage.getConversionID()));
+                    usermodel.setTen(chatMessage.getConversionName());
+                    usermodel.setUrl(chatMessage.getConversionImage());
+                    conversionListener.onConversionUserClicked(usermodel);
+                });
+            }
         }
     }
 

@@ -30,5 +30,5 @@ public class Constants {
     public static final String KEY_LAST_MESSAGE = "lastMessage";
     public static final String KEY_AVAIlABILITY = "availability";
     public static final String KEY_LOGIN = "Login";
-    public static final String KEY_API = "http://192.168.1.8:8080/" ;
+    public static final String KEY_API = "http://192.168.1.9:8080/" ;
 }

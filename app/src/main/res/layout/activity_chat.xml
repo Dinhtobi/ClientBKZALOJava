@@ -121,14 +121,35 @@
             tools:ignore="ImageContrastCheck,ImageContrastCheck" />
 
     </FrameLayout>
-
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/upload"
+        android:layout_width="53dp"
+        android:layout_height="56dp"
+        android:layout_marginEnd="348dp"
+        android:layout_marginBottom="20dp"
+        android:backgroundTint="@color/primary"
+        android:contentDescription="@string/app_name"
+        android:src="@drawable/ic_upload"
+        android:tint="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+    <androidx.appcompat.widget.AppCompatImageView
+        android:layout_width="57dp"
+        android:layout_height="47dp"
+        android:layout_marginEnd="280dp"
+        android:layout_marginBottom="20dp"
+        android:padding="@dimen/_4sdp"
+        android:src="@drawable/ic_icon"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:ignore="ImageContrastCheck" />
     <EditText
         android:id="@+id/inputMessage"
         android:layout_width="0dp"
         android:layout_height="@dimen/_40sdp"
-        android:layout_marginStart="@dimen/_16sdp"
+        android:layout_marginStart="@dimen/_100sdp"
         android:layout_marginEnd="@dimen/_8sdp"
-        android:layout_marginBottom="@dimen/_12ssp"
+        android:layout_marginBottom="12dp"
         android:background="@drawable/background_chat_input"
         android:hint="@string/type_a_message"
         android:imeOptions="actionDone"
@@ -140,7 +161,8 @@
         android:textColorHint="#78909C"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/layoutSend"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"/>
     <TextView
         android:id="@+id/textAvailability"
         android:layout_width="match_parent"
@@ -153,5 +175,7 @@
         android:textSize="@dimen/_10ssp"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/imageBack"/>
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

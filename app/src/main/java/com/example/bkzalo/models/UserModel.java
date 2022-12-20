@@ -16,9 +16,6 @@ public class UserModel implements Serializable {
     public void setId(Long id) {
         this.id = id;
     }
-
-    @SerializedName("ho")
-    private String ho ;
     @SerializedName("ten")
     private String ten ;
     @SerializedName("url")
@@ -36,13 +33,6 @@ public class UserModel implements Serializable {
         this.trangthai = trangthai;
     }
 
-    public String getHo() {
-        return ho;
-    }
-
-    public void setHo(String ho) {
-        this.ho = ho;
-    }
 
     public String getTen() {
         return ten;

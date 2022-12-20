@@ -9,14 +9,16 @@ import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.http.Body;
 import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 
-public interface SignupAPI {
+public interface UserAPI {
     Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
-        SignupAPI signupAPI = new Retrofit.Builder().baseUrl(Constants.KEY_API)
+        UserAPI userAPI = new Retrofit.Builder().baseUrl(Constants.KEY_API)
         .addConverterFactory(GsonConverterFactory.create(gson))
-        .build().create(SignupAPI.class);
+        .build().create(UserAPI.class);
     @POST("Test-web/api-admin-new")
     Call<UserModel>sendPost(@Body UserModel usermodel);
+    @PUT("Test-web/api-admin-new")
+    Call<UserModel> sendPut(@Body UserModel userModel);
 }

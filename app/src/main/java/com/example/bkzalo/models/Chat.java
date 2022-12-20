@@ -1,11 +1,10 @@
 package com.example.bkzalo.models;
 
 import com.google.gson.annotations.SerializedName;
-import com.google.type.DateTime;
+
 
 import java.io.Serializable;
-import java.sql.Date;
-import java.sql.Timestamp;
+
 
 public class Chat implements Serializable {
     @SerializedName("id_tinnhan")

@@ -1,11 +1,19 @@
 package com.example.bkzalo.models;
 
-public class DetailGroup {
+import com.google.gson.annotations.SerializedName;
+
+import java.io.Serializable;
+
+public class DetailGroup implements Serializable {
+    @SerializedName("id_nhomchat")
     private Long id_nhomchat ;
+    @SerializedName("id_nguoidung")
     private Long  id_nguoidung ;
+    @SerializedName("thoigianthamgia")
     private String  thoigianthamgia  ;
+    @SerializedName("thoigianroikhoi")
     private String thoigianroikhoi ;
-    private String type ;
+
 
     public Long getId_nhomchat() {
         return id_nhomchat;
@@ -39,11 +47,4 @@ public class DetailGroup {
         this.thoigianroikhoi = thoigianroikhoi;
     }
 
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
 }
