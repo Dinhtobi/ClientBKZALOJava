@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layout_bottom_sheet"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:orientation="vertical"
+    android:padding="16dp"
+    app:behavior_hideable="true"
+    app:behavior_peekHeight="0dp"
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+    <Button
+        android:id="@+id/btdel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Xoá khỏi nhóm"
+        android:textSize="16dp"
+        android:textStyle="bold"
+        android:visibility="gone"></Button>
+    <Button
+        android:id="@+id/btout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Rời khởi nhóm"
+        android:textSize="16dp"
+        android:textStyle="bold"
+        android:visibility="gone"></Button>
+    <Button
+        android:id="@+id/btroll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Chuyển quyền quản trị viên"
+        android:textSize="16dp"
+        android:textStyle="bold"
+        android:visibility="gone"></Button>
+    <Button
+        android:id="@+id/btchat"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Chat "
+        android:textSize="16dp"
+        android:textStyle="bold"></Button>
+
+
+
+</LinearLayout>
