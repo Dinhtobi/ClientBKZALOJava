@@ -64,7 +64,6 @@ public class ProfileUserActivity extends AppCompatActivity {
                 CloseClick();
                 }
             });
-
     }
 
     private void UpdateProfileClick() {

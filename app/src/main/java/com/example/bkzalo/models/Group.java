@@ -14,7 +14,16 @@ public class Group implements Serializable {
     private Long id_nhomchat;
     @SerializedName("image")
     private String image;
+    @SerializedName("type")
+    private String type;
 
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 
     public Long getId_nguoitao() {
         return id_nguoitao;

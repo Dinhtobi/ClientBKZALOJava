@@ -15,10 +15,10 @@ import android.text.TextWatcher;
 import android.util.Base64;
 import android.view.View;
 
-import com.example.bkzalo.API.AddDetailGroupAPI;
-import com.example.bkzalo.API.AddGroupAPI;
+import com.example.bkzalo.API.DetailGroupAPI;
+import com.example.bkzalo.API.GroupAPI;
 import com.example.bkzalo.API.GetUsersAPI;
-import com.example.bkzalo.adapters.AddGroupAdapter;
+import com.example.bkzalo.adapters.AddMemberAdapter;
 import com.example.bkzalo.databinding.ActivityAddGroupBinding;
 import com.example.bkzalo.listeners.CheckAddListener;
 import com.example.bkzalo.listeners.SearchUserListener;
@@ -44,7 +44,7 @@ public class AddGroup extends AppCompatActivity implements CheckAddListener, Sea
     private ActivityAddGroupBinding binding;
     private PreferenceManager preferenceManager;
     public String encodedImage;
-    private AddGroupAdapter addGroupAdapter;
+    private AddMemberAdapter addMemberAdapter;
 
     private List<Long> detailGroups = new ArrayList<>();
     @Override
@@ -54,7 +54,7 @@ public class AddGroup extends AppCompatActivity implements CheckAddListener, Sea
         setContentView(binding.getRoot());
         preferenceManager = new PreferenceManager(getApplicationContext());
         SetListeners();
-        addGroupAdapter = new AddGroupAdapter(this::onCheckClick);
+        addMemberAdapter = new AddMemberAdapter(this::onCheckClick);
         getUsers();
         SearchChangeListener();
     }
@@ -76,7 +76,7 @@ public class AddGroup extends AppCompatActivity implements CheckAddListener, Sea
         group.setImage(encodedImage);
         group.setTennhom(binding.inputName.getText().toString());
         group.setId_nguoitao(id_nguoitao);
-        AddGroupAPI.addgroupapi.addGroup(group).enqueue(new Callback<Group>() {
+        GroupAPI.groupapi.addGroup(group).enqueue(new Callback<Group>() {
             @Override
             public void onResponse(Call<Group> call, Response<Group> response) {
                 if(response.body()!=null){
@@ -89,7 +89,7 @@ public class AddGroup extends AppCompatActivity implements CheckAddListener, Sea
                        Date dnow = new Date();
                        SimpleDateFormat ft = new SimpleDateFormat("yyyy.MM.dd 'at' hh:mm:ss");
                        newmember.setThoigianthamgia(ft.format(dnow));
-                      AddDetailGroupAPI.adddetailgroupapi.adduseringroup(newmember).enqueue(new Callback<DetailGroup>() {
+                      DetailGroupAPI.detailgroupapi.adduseringroup(newmember).enqueue(new Callback<DetailGroup>() {
                           @Override
                           public void onResponse(Call<DetailGroup> call, Response<DetailGroup> response) {
                               if(response.body()!=null){
@@ -167,8 +167,8 @@ public class AddGroup extends AppCompatActivity implements CheckAddListener, Sea
 
                     }
                     if (users.size() > 0) {
-                        addGroupAdapter.setData(users);
-                        binding.usersRecyclerView.setAdapter(addGroupAdapter);
+                        addMemberAdapter.setData(users);
+                        binding.usersRecyclerView.setAdapter(addMemberAdapter);
                         binding.usersRecyclerView.setVisibility(View.VISIBLE);
                     } else {
                         showErrorMessage();
@@ -236,7 +236,7 @@ public class AddGroup extends AppCompatActivity implements CheckAddListener, Sea
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 String search = binding.inputSearch.getText().toString();
-                List<UserModel> list = addGroupAdapter.GetData();
+                List<UserModel> list = addMemberAdapter.GetData();
                 List<UserModel> listserach = new ArrayList<>();
                 for(int i = 0 ; i< list.size() ; i++){
                     if(list.get(i).getTen().contains(search)){
@@ -244,12 +244,12 @@ public class AddGroup extends AppCompatActivity implements CheckAddListener, Sea
                     }
                 }
                 if(search.equals("")){
-                    addGroupAdapter.setData(users);
-                    binding.usersRecyclerView.setAdapter(addGroupAdapter);
+                    addMemberAdapter.setData(users);
+                    binding.usersRecyclerView.setAdapter(addMemberAdapter);
                     binding.usersRecyclerView.setVisibility(View.VISIBLE);
                 }else{
-                    addGroupAdapter.setData(listserach);
-                    binding.usersRecyclerView.setAdapter(addGroupAdapter);
+                    addMemberAdapter.setData(listserach);
+                    binding.usersRecyclerView.setAdapter(addMemberAdapter);
                     binding.usersRecyclerView.setVisibility(View.VISIBLE);
                 }
 

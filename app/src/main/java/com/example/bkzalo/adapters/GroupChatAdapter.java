@@ -116,7 +116,7 @@ public class GroupChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
         void  setData(Chat chatMessage, Bitmap receiverProfileImage) {
             binding.textMessage.setText(chatMessage.getNoidung());
-            binding.textDateTime.setText(chatMessage.getThoigiantao().toString());
+            binding.textDateTime.setText(chatMessage.getThoigiantao());
             binding.imageProfile.setImageBitmap(receiverProfileImage);
         }
     }

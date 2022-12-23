@@ -15,6 +15,13 @@
         android:theme="@style/Theme.BKZalo"
         tools:targetApi="31">
         <activity
+            android:name=".activities.AddMemberActivity"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
             android:name=".activities.InfoGroup"
             android:exported="false">
             <meta-data

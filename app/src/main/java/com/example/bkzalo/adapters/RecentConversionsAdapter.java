@@ -67,6 +67,7 @@ public class RecentConversionsAdapter extends RecyclerView.Adapter<RecentConvers
                     group.setId_nhomchat(chatMessage.getId_nhomchat());
                     group.setTennhom(chatMessage.getConversionName());
                     group.setImage(chatMessage.getConversionImage());
+                    group.setType("User");
                     conversionListener.onConversionGroupClicked(group);
                 });
             }else{

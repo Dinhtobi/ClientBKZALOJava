@@ -82,6 +82,7 @@ public class GroupListActivity extends AppCompatActivity implements GroupsListen
                 group.setTennhom(list.get(i).getTennhom());
                 group.setId_nhomchat(list.get(i).getId_nhomchat());
                 group.setImage(list.get(i).getImage());
+                group.setType("User");
                 if(CheckGroup(group)){
                     groupList.add(group);
                 }

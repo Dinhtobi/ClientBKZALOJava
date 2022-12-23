@@ -183,6 +183,9 @@ public class GroupChatActivities extends AppCompatActivity {
         });
         groupreceived = (Group) getIntent().getSerializableExtra(Constants.KEY_GROUP);
         String currentUserId = preferenceManager.getString(Constants.KEY_USER_ID);
+//        Group group = new Group();
+//        group.setType("admin");
+//        group.setId_nhomchat(groupreceived.getId_nhomchat());
         ListMemberGroupAPI.listMemberGroupApi.listmember(groupreceived).enqueue(new Callback<List<UserModel>>() {
             @Override
             public void onResponse(Call<List<UserModel>> call, Response<List<UserModel>> response) {
@@ -290,6 +293,8 @@ public class GroupChatActivities extends AppCompatActivity {
     }
     private void Info(){
         Intent intent = new Intent(getApplicationContext(), InfoGroup.class);
+        groupreceived = (Group) getIntent().getSerializableExtra(Constants.KEY_GROUP);
+        intent.putExtra(Constants.KEY_GROUP,  groupreceived);
         startActivity(intent);
     }
     @Override
@@ -372,6 +377,7 @@ public class GroupChatActivities extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         listenAvailabilityOfReceiver();
+        loadUserReceive();
     }
     private void showToast(String message){
         Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
@@ -386,4 +392,5 @@ public class GroupChatActivities extends AppCompatActivity {
         }
         return add;
     }
+
 }

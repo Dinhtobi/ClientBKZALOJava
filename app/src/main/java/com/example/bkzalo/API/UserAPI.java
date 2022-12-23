@@ -17,8 +17,8 @@ public interface UserAPI {
         UserAPI userAPI = new Retrofit.Builder().baseUrl(Constants.KEY_API)
         .addConverterFactory(GsonConverterFactory.create(gson))
         .build().create(UserAPI.class);
-    @POST("Test-web/api-admin-new")
+    @POST("Test-web/api-admin-user")
     Call<UserModel>sendPost(@Body UserModel usermodel);
-    @PUT("Test-web/api-admin-new")
+    @PUT("Test-web/api-admin-user")
     Call<UserModel> sendPut(@Body UserModel userModel);
 }

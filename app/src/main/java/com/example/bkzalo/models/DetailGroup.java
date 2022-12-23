@@ -13,7 +13,16 @@ public class DetailGroup implements Serializable {
     private String  thoigianthamgia  ;
     @SerializedName("thoigianroikhoi")
     private String thoigianroikhoi ;
+    @SerializedName("trangthai")
+    private int trangthai;
 
+    public int getTrangthai() {
+        return trangthai;
+    }
+
+    public void setTrangthai(int trangthai) {
+        this.trangthai = trangthai;
+    }
 
     public Long getId_nhomchat() {
         return id_nhomchat;

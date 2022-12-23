@@ -9,7 +9,7 @@
     tools:context=".activities.AddGroup">
 
     <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/imageBack"
+        android:id="@+id/imageback"
         android:layout_width="@dimen/_30sdp"
         android:layout_height="@dimen/_30sdp"
         android:layout_marginStart="@dimen/_16sdp"
@@ -17,10 +17,19 @@
         android:background="@drawable/background_icon"
         android:padding="@dimen/_6sdp"
         android:src="@drawable/ic_back"
+        android:tint="@color/white"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/imageBack"
+        android:layout_width="@dimen/_30sdp"
+        android:layout_height="@dimen/_30sdp"
+        android:layout_marginStart="@dimen/_16sdp"
+        android:layout_marginTop="@dimen/_12ssp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:tint="@color/white"/>
-
+        android:tint="@color/white"
+        />
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -31,7 +40,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/imageBack"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/imageBack"/>
+        app:layout_constraintTop_toTopOf="@+id/imageBack" />
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -62,21 +71,29 @@
                     app:riv_oval="true" />
             </FrameLayout>
 
-            <EditText
-                android:id="@+id/inputName"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/Nickname"
                 android:layout_width="336dp"
                 android:layout_height="@dimen/_45sdp"
                 android:layout_marginTop="@dimen/_20sdp"
                 android:background="@drawable/background_input"
-                android:hint="Tên nhóm"
-                android:imeOptions="actionNext"
+                android:enabled="false"
                 android:importantForAutofill="no"
-                android:inputType="text"
                 android:paddingStart="@dimen/_16sdp"
                 android:paddingEnd="@dimen/_16sdp"
                 android:textColor="@color/primary_text"
                 android:textColorHint="#546E7A"
-                android:textSize="@dimen/_13ssp" />
+                android:hint="Tên nhóm"
+                android:textSize="@dimen/_13ssp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/inputName"
+                    android:layout_width="301dp"
+                    android:layout_height="@dimen/_46sdp"
+                    android:background="@drawable/background_input"
+                    android:ems="5"
+                    android:inputType="text"
+                    />
+            </com.google.android.material.textfield.TextInputLayout>
 
             <ExpandableListView
                 android:id="@+id/expandlistuser"
@@ -88,8 +105,28 @@
                 android:textColor="@color/primary_text"
                 android:textColorHint="#546E7A"
                 android:textSize="@dimen/_16ssp">
-
             </ExpandableListView>
+
+           <Button
+               android:id="@+id/addmember"
+               android:layout_width="336dp"
+               android:layout_height="@dimen/_30sdp"
+               android:backgroundTint="@color/inputbackground"
+               android:hint="Thêm thành viên"
+               android:drawableLeft="@drawable/ic_add"
+               android:imeOptions="actionNext"
+               android:importantForAutofill="no"
+               android:inputType="text"
+               android:paddingStart="@dimen/_16sdp"
+               android:paddingEnd="@dimen/_16sdp"
+               android:textColor="@color/primary_text"
+               android:textColorHint="#546E7A"
+               android:textSize="@dimen/_13ssp"
+               android:textStyle="bold"
+               android:visibility="gone"
+               >
+
+           </Button>
 
 
         </LinearLayout>
@@ -104,9 +141,21 @@
             android:gravity="center"
             android:textColor="@color/error"
             android:textSize="@dimen/_12ssp"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
     </FrameLayout>
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/imageupdate"
+        android:layout_width="@dimen/_30sdp"
+        android:layout_height="@dimen/_30sdp"
+        android:layout_marginStart="340dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/background_icon"
+        android:padding="@dimen/_6sdp"
+        android:src="@drawable/ic_update"
+        android:tint="@color/white"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/imageadd"
         android:layout_width="@dimen/_30sdp"
@@ -118,6 +167,22 @@
         android:src="@drawable/ic_ok"
         android:tint="@color/white"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="gone"/>
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/imageclose"
+        android:layout_width="@dimen/_30sdp"
+        android:layout_height="@dimen/_30sdp"
+        android:layout_marginStart="@dimen/_16sdp"
+        android:layout_marginTop="@dimen/_12ssp"
+        android:background="@drawable/background_icon"
+        android:padding="@dimen/_6sdp"
+        android:src="@drawable/ic_close"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:tint="@color/white"
+        android:visibility="gone"
+        />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

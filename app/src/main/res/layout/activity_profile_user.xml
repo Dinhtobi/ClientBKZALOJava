@@ -86,16 +86,17 @@
                 android:paddingStart="@dimen/_16sdp"
                 android:paddingEnd="@dimen/_16sdp"
                 android:textColor="@color/primary_text"
-                android:textColorHint="#546E7A"
+                android:textColorHint="#000000"
                 android:hint="Nickname"
-                android:textSize="@dimen/_13ssp">
+                android:textSize="@dimen/_13ssp"
+                >
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/inputName"
                     android:layout_width="301dp"
                     android:layout_height="@dimen/_46sdp"
                     android:background="@drawable/background_input"
                     android:ems="5"
-
+                    android:textStyle="bold"
                     android:inputType="text"
                     />
             </com.google.android.material.textfield.TextInputLayout>
@@ -111,7 +112,7 @@
                 android:paddingStart="@dimen/_16sdp"
                 android:paddingEnd="@dimen/_16sdp"
                 android:textColor="@color/primary_text"
-                android:textColorHint="#546E7A"
+                android:textColorHint="#000000"
                 android:hint="Email"
                 android:textSize="@dimen/_13ssp">
                 <com.google.android.material.textfield.TextInputEditText
@@ -120,7 +121,7 @@
                     android:layout_height="@dimen/_46sdp"
                     android:background="@drawable/background_input"
                     android:ems="5"
-
+                    android:textStyle="bold"
                     android:inputType="text"
                     />
             </com.google.android.material.textfield.TextInputLayout>
@@ -137,7 +138,7 @@
                 android:paddingStart="@dimen/_16sdp"
                 android:paddingEnd="@dimen/_16sdp"
                 android:textColor="@color/primary_text"
-                android:textColorHint="#546E7A"
+                android:textColorHint="#000000"
                 android:textSize="@dimen/_13ssp"
                 android:hint="@string/password"
                 app:passwordToggleEnabled="true"
@@ -148,7 +149,7 @@
                     android:layout_height="@dimen/_46sdp"
                     android:background="@drawable/background_input"
                     android:ems="5"
-
+                    android:textStyle="bold"
                     android:inputType="textPassword"
                     />
             </com.google.android.material.textfield.TextInputLayout>
@@ -164,7 +165,7 @@
                 android:paddingStart="@dimen/_16sdp"
                 android:paddingEnd="@dimen/_16sdp"
                 android:textColor="@color/primary_text"
-                android:textColorHint="#546E7A"
+                android:textColorHint="#000000"
                 android:textSize="@dimen/_13ssp"
                 android:hint="Confirm Password"
                 app:passwordToggleEnabled="true"
@@ -176,6 +177,7 @@
                     android:background="@drawable/background_input"
                     android:ems="5"
                     android:inputType="textPassword"
+                    android:textStyle="bold"
                     />
             </com.google.android.material.textfield.TextInputLayout>
 

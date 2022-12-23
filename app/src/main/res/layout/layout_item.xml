@@ -31,7 +31,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/_8sdp"
-        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_50sdp"
         android:ellipsize="end"
         android:maxLines="1"
         android:textColor="@color/primary_text"
@@ -39,4 +39,5 @@
         app:layout_constraintBottom_toTopOf="@+id/viewSupporter"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/imageProfile"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

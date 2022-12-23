@@ -4,28 +4,23 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Base64;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.bkzalo.databinding.ItemContainerUserBinding;
 import com.example.bkzalo.databinding.ItemContainerUsergroupBinding;
 import com.example.bkzalo.listeners.CheckAddListener;
-import com.example.bkzalo.listeners.UserListener;
-import com.example.bkzalo.models.Group;
 import com.example.bkzalo.models.UserModel;
 
 import java.util.List;
 
-public class AddGroupAdapter extends RecyclerView.Adapter<AddGroupAdapter.AddGroupViewHolder> {
+public class AddMemberAdapter extends RecyclerView.Adapter<AddMemberAdapter.AddGroupViewHolder> {
 
     private List<UserModel> users;
     private final CheckAddListener checkAddListener;
     private List<UserModel> checkeds;
-    public  AddGroupAdapter(CheckAddListener checkAddListener) {
+    public AddMemberAdapter(CheckAddListener checkAddListener) {
         this.checkAddListener = checkAddListener;
     }
     public void setData(List<UserModel> userResponseList) {
@@ -43,7 +38,7 @@ public class AddGroupAdapter extends RecyclerView.Adapter<AddGroupAdapter.AddGro
                 parent,
                 false
         );
-        return new AddGroupAdapter.AddGroupViewHolder(itemContainerUsergroupBinding);
+        return new AddMemberAdapter.AddGroupViewHolder(itemContainerUsergroupBinding);
     }
 
     @Override

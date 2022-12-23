@@ -175,6 +175,7 @@ public class MainActivity extends AppCompatActivity implements ConversionListene
                             if(conversations.get(j).getId_nguoigui().equals(senderid) && conversations.get(j).getId_nhomchat().equals(id_nhomchat)){
                                 conversations.get(j).setNoidung(i.getTinnhancuoi());
                                 conversations.get(j).setThoigiantao(i.getThoigiantao());
+                                conversations.get(j).setConversionName(i.getTennhom());
                                 break;
                             }
                         }
@@ -210,6 +211,7 @@ public class MainActivity extends AppCompatActivity implements ConversionListene
                           if(conversations.get(j).getId_nguoigui().equals(senderid) && conversations.get(j).getId_nguoinhan().equals(receiderid)){
                               conversations.get(j).setNoidung(i.getTinnhancuoi());
                               conversations.get(j).setThoigiantao(i.getThoigiantao());
+                              conversations.get(j).setConversionName(i.getTenreceider());
                               break;
                           }
                       }
@@ -313,6 +315,8 @@ public class MainActivity extends AppCompatActivity implements ConversionListene
     protected void onResume() {
         super.onResume();
         loadUserDetails();
+        conversations.clear();
+        listenConversations();
     }
 
 }

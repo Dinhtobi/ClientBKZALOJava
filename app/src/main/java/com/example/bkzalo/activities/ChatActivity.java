@@ -1,8 +1,5 @@
 package com.example.bkzalo.activities;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -15,7 +12,6 @@ import com.example.bkzalo.API.BoxMessageAPI;
 import com.example.bkzalo.API.ListMessageAPI;
 import com.example.bkzalo.API.MessageAPI;
 import com.example.bkzalo.API.SetOnlineAPI;
-import com.example.bkzalo.R;
 import com.example.bkzalo.adapters.ChatAdapter;
 import com.example.bkzalo.databinding.ActivityChatBinding;
 import com.example.bkzalo.models.BoxLastMessage;
@@ -37,14 +33,12 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class ChatActivity extends AppCompatActivity  {
-    private  final  int NOTIFICATION_ID = 1;
     private ActivityChatBinding binding;
     private UserModel receiverUser;
     private List<Chat> chatMessages;
     private ChatAdapter chatAdapter;
     private PreferenceManager preferenceManager;
     private String conversionId = null;
-    private Boolean isReceiverAvailable = false;
     private int sizesend  ;
     private  int sizereceid;
     private  Timer timer;
