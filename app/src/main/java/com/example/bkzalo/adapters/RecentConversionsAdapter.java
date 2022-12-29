@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.bkzalo.databinding.ItemContainerRecentConversionBinding;
 import com.example.bkzalo.listeners.ConversionListener;
-import com.example.bkzalo.models.Chat;
+import com.example.bkzalo.models.Message;
 import com.example.bkzalo.models.Group;
 import com.example.bkzalo.models.UserModel;
 
@@ -19,10 +19,10 @@ import java.util.List;
 
 public class RecentConversionsAdapter extends RecyclerView.Adapter<RecentConversionsAdapter.ConversionViewHolder>{
 
-    private final List<Chat> chatMessages;
+    private final List<Message> chatMessages;
     private final ConversionListener conversionListener;
 
-    public RecentConversionsAdapter(List<Chat> chatMessages, ConversionListener conversionListener) {
+    public RecentConversionsAdapter(List<Message> chatMessages, ConversionListener conversionListener) {
         this.chatMessages = chatMessages;
         this.conversionListener = conversionListener;
     }
@@ -57,7 +57,7 @@ public class RecentConversionsAdapter extends RecyclerView.Adapter<RecentConvers
             binding = itemContainerRecentConversionBinding;
         }
 
-        void setData(Chat chatMessage) {
+        void setData(Message chatMessage) {
             binding.imageProfile.setImageBitmap(getConversionImage(chatMessage.getConversionImage()));
             binding.textName.setText(chatMessage.getConversionName());
             binding.textRecentMessage.setText(chatMessage.getNoidung());

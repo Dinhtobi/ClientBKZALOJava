@@ -1,6 +1,6 @@
 package com.example.bkzalo.API;
 
-import com.example.bkzalo.models.Chat;
+import com.example.bkzalo.models.Message;
 import com.example.bkzalo.utilities.Constants;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -17,5 +17,5 @@ public interface MessageAPI {
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build().create(MessageAPI.class);
     @POST("Test-web/api-admin-message")
-    Call<Chat> SendChat(@Body Chat chat);
+    Call<Message> SendChat(@Body Message chat);
 }

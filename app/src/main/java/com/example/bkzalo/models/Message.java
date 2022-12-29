@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 
 
-public class Chat implements Serializable {
+public class Message implements Serializable {
     @SerializedName("id_tinnhan")
     private Long id_tinnhan;
     @SerializedName("id_nguoigui")
@@ -24,7 +24,19 @@ public class Chat implements Serializable {
     @SerializedName("thoigiantao")
     private String thoigiantao ;
     @SerializedName("id_nhomchat")
+
     private Long id_nhomchat ;
+    @SerializedName("fileformat")
+    private int fileformat;
+
+    public int getFileformat() {
+        return fileformat;
+    }
+
+    public void setFileformat(int fileformat) {
+        this.fileformat = fileformat;
+    }
+
 
     public String getNoidung() {
         return noidung;

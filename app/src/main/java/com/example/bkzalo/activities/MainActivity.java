@@ -21,7 +21,7 @@ import com.example.bkzalo.adapters.RecentConversionsAdapter;
 import com.example.bkzalo.databinding.ActivityMainBinding;
 import com.example.bkzalo.listeners.ConversionListener;
 import com.example.bkzalo.models.BoxLastMessage;
-import com.example.bkzalo.models.Chat;
+import com.example.bkzalo.models.Message;
 import com.example.bkzalo.models.Group;
 import com.example.bkzalo.models.UserModel;
 import com.example.bkzalo.utilities.Constants;
@@ -39,7 +39,7 @@ import retrofit2.Response;
 public class MainActivity extends AppCompatActivity implements ConversionListener {
     private ActivityMainBinding binding;
     private PreferenceManager preferenceManager;
-    private List<Chat> conversations;
+    private List<Message> conversations;
     private RecentConversionsAdapter conversationsAdapter;
     private  Timer timer;
     private TimerTask task ;
@@ -157,7 +157,7 @@ public class MainActivity extends AppCompatActivity implements ConversionListene
                           if(CheckConversions(i)){
                                 Long senderid = i.getId_nguoigui();
                                 Long id_nhomchat = i.getId_nhomchat();
-                                Chat chat = new Chat();
+                                Message chat = new Message();
                                 chat.setId_nhomchat(id_nhomchat);
                                 chat.setId_nguoigui(senderid);
                                 chat.setId_nguoinhan(0L);
@@ -184,7 +184,7 @@ public class MainActivity extends AppCompatActivity implements ConversionListene
                   if(CheckConversions(i)){
                       Long senderId = i.getId_nguoigui();
                       Long receiderId = i.getId_nguoinhan();
-                      Chat chat = new Chat();
+                      Message chat = new Message();
                       chat.setId_nguoigui(senderId);
                       chat.setId_nguoinhan(receiderId);
                       chat.setId_nhomchat(i.getId_nhomchat());

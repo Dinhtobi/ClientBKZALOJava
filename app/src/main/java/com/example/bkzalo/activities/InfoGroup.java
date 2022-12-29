@@ -260,12 +260,12 @@ public class InfoGroup extends AppCompatActivity implements BottomsheetListener 
                 });
                 boolean finalNguoitao = nguoitao;
                 viewdialog.findViewById(R.id.btout).setOnClickListener(v->{
-                    if(finalNguoitao){
+                    if(finalNguoitao && expandableListAdapter.getGroupCount() >1){
                         showToast("Chuyển quyền quản trị viên cho người khác");
                         bottomSheetDialog.dismiss();
                     }else{
                         Del(us);
-                        Intent intent = new Intent(getApplicationContext(), GroupListActivity.class);
+                        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                         startActivity(intent);
                         finish();
                     }

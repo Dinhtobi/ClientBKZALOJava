@@ -1,6 +1,6 @@
 package com.example.bkzalo.API;
 
-import com.example.bkzalo.models.Chat;
+import com.example.bkzalo.models.Message;
 import com.example.bkzalo.utilities.Constants;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -19,5 +19,5 @@ public interface ListMessageAPI {
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build().create(ListMessageAPI.class);
     @POST("Test-web/api-admin-listmessage")
-    Call<List<Chat>> ListMes(@Body Chat chat);
+    Call<List<Message>> ListMes(@Body Message chat);
 }
