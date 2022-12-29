@@ -14,5 +14,5 @@ public class Constants {
     public static final String KEY_IMAGE = "image";
     public static final String KEY_USERMODEL="usermodel";
     public static final String KEY_GROUP="group";
-    public static final String KEY_API = "http://192.168.1.2:8080/" ;
+    public static final String KEY_API = "http://192.168.2.203:8080/" ;
 }
