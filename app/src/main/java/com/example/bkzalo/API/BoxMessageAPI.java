@@ -18,8 +18,8 @@ public interface BoxMessageAPI {
     BoxMessageAPI boxmessageAPI = new Retrofit.Builder().baseUrl(Constants.KEY_API)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build().create(BoxMessageAPI.class);
-    @POST("Test-web/api-admin-boxmessage")
+    @POST("/api/create-boxchat")
     Call<BoxLastMessage> converBox(@Body BoxLastMessage boxLastMessage);
-    @PUT("Test-web/api-admin-boxmessage")
+    @PUT("/api/update-boxchat")
     Call<BoxLastMessage> Update(@Body BoxLastMessage boxLastMessage);
 }

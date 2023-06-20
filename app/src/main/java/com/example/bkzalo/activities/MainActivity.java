@@ -5,6 +5,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 
+import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 import android.util.Base64;
@@ -26,12 +28,19 @@ import com.example.bkzalo.models.Group;
 import com.example.bkzalo.models.UserModel;
 import com.example.bkzalo.utilities.Constants;
 import com.example.bkzalo.utilities.PreferenceManager;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -89,58 +98,127 @@ public class MainActivity extends AppCompatActivity implements ConversionListene
 
     private void listenConversations() {
         BoxLastMessage box1 = new BoxLastMessage();
-        box1.setId_nguoigui(Long.parseLong(preferenceManager.getString(Constants.KEY_USER_ID)));
-        ListBoxMessageAPI.listboxmessageAPI.ListBOX(box1).enqueue(new Callback<List<BoxLastMessage>>() {
+        box1.setId_sender(Integer.parseInt(preferenceManager.getString(Constants.KEY_USER_ID)));
+        box1.setType("All");
+
+        ListBoxMessageAPI.listboxmessageAPI.ListBOX(box1).enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(Call<List<BoxLastMessage>> call, Response<List<BoxLastMessage>> response) {
-                List<BoxLastMessage> list = response.body();
-                if(list != null)   ConversionBox(list);
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                ResponseBody responseBody = response.body();
+                try {
+                    String jsonString = responseBody.string();
+                    Gson gson = new GsonBuilder().create();
+                    JsonObject jsonObject = gson.fromJson(jsonString, JsonObject.class);
+                    JsonElement messageElement = jsonObject.get("message");
+                    List<BoxLastMessage> list;
+
+                    if (messageElement != null && messageElement.isJsonArray()) {
+                        JsonArray messagesArray = messageElement.getAsJsonArray();
+                        Type messageListType = new TypeToken<List<BoxLastMessage>>(){}.getType();
+                        list = gson.fromJson(messagesArray, messageListType);
+                    } else {
+                        list = new ArrayList<>(); // Hoặc giá trị mặc định tùy vào yêu cầu của bạn
+                    }
+                    if(list != null)   ConversionBox(list);
+
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
             }
             @Override
-            public void onFailure(Call<List<BoxLastMessage>> call, Throwable t) {
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
                     showToast("Lỗi dữ liệu");
             }
         });
         BoxLastMessage box2 = new BoxLastMessage();
-        box2.setId_nguoinhan(Long.parseLong(preferenceManager.getString(Constants.KEY_USER_ID)));
-        ListBoxMessageAPI.listboxmessageAPI.ListBOX(box2).enqueue(new Callback<List<BoxLastMessage>>() {
+        box2.setId_receiver(Integer.parseInt(preferenceManager.getString(Constants.KEY_USER_ID)));
+        box2.setType("All");
+        ListBoxMessageAPI.listboxmessageAPI.ListBOX(box2).enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(Call<List<BoxLastMessage>> call, Response<List<BoxLastMessage>> response) {
-                List<BoxLastMessage> list = response.body();
-                if(list != null)   ConversionBox(list);
-            }
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                ResponseBody responseBody = response.body();
+                try {
+                    String jsonString = responseBody.string();
+                    Gson gson = new GsonBuilder().create();
+                    JsonObject jsonObject = gson.fromJson(jsonString, JsonObject.class);
+                    List<BoxLastMessage> list;
+                    JsonElement messageElement = jsonObject.get("message");
 
-            @Override
-            public void onFailure(Call<List<BoxLastMessage>> call, Throwable t) {
-                showToast("Lỗi dữ liệu");
-            }
-        });
-        UserModel user = new UserModel();
-        user.setId(Long.parseLong(preferenceManager.getString(Constants.KEY_USER_ID)));
-        ListGroupsAPI.listGroupsApi.listgroup(user).enqueue(new Callback<List<Group>>() {
-            @Override
-            public void onResponse(Call<List<Group>> call, Response<List<Group>> response) {
-                List<Group> list = response.body();
-                for(Group i : list){
-                    BoxLastMessage box3 = new BoxLastMessage();
-                    box3.setId_nhomchat(i.getId_nhomchat());
-                    ListBoxMessageAPI.listboxmessageAPI.ListBOX(box3).enqueue(new Callback<List<BoxLastMessage>>() {
-                        @Override
-                        public void onResponse(Call<List<BoxLastMessage>> call, Response<List<BoxLastMessage>> response) {
-                            List<BoxLastMessage> list = response.body();
-                            if(list != null)   ConversionBox(list);
-                        }
+                    if (messageElement != null && messageElement.isJsonArray()) {
+                        JsonArray messagesArray = messageElement.getAsJsonArray();
+                        Type messageListType = new TypeToken<List<BoxLastMessage>>(){}.getType();
+                        list = gson.fromJson(messagesArray, messageListType);
+                    } else {
+                        list = new ArrayList<>(); // Hoặc giá trị mặc định tùy vào yêu cầu của bạn
+                    }
+                    if(list != null)   ConversionBox(list);
 
-                        @Override
-                        public void onFailure(Call<List<BoxLastMessage>> call, Throwable t) {
-                            showToast("Lỗi dữ liệu");
-                        }
-                    });
+                }catch (IOException e){
+                    e.printStackTrace();
                 }
             }
 
             @Override
-            public void onFailure(Call<List<Group>> call, Throwable t) {
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                showToast("Lỗi dữ liệu");
+            }
+        });
+        UserModel user = new UserModel();
+        user.setId(Integer.parseInt(preferenceManager.getString(Constants.KEY_USER_ID)));
+        ListGroupsAPI.listGroupsApi.listgroup(user).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                ResponseBody responseBody = response.body();
+                try {
+                    String jsonString = responseBody.string();
+                    Gson gson = new GsonBuilder().create();
+                    JsonObject jsonObject = gson.fromJson(jsonString, JsonObject.class);
+                    List<Group> list;
+                    JsonElement messageElement = jsonObject.get("message");
+
+                    if (messageElement != null && messageElement.isJsonArray()) {
+                        JsonArray messagesArray = messageElement.getAsJsonArray();
+                        Type messageListType = new TypeToken<List<Group>>(){}.getType();
+                        list = gson.fromJson(messagesArray, messageListType);
+                    } else {
+                        list = new ArrayList<>(); // Hoặc giá trị mặc định tùy vào yêu cầu của bạn
+                    }
+                    for(Group i : list){
+                        BoxLastMessage box3 = new BoxLastMessage();
+                        box3.setId_groupchat(i.getId());
+                        box3.setType("All");
+                        ListBoxMessageAPI.listboxmessageAPI.ListBOX(box3).enqueue(new Callback<ResponseBody>() {
+                            @Override
+                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                ResponseBody responseBody = response.body();
+                                try {
+                                    String jsonString = responseBody.string();
+                                    Gson gson = new GsonBuilder().create();
+                                    JsonObject jsonObject = gson.fromJson(jsonString, JsonObject.class);
+                                    JsonArray messagesArray = jsonObject.getAsJsonArray("message");
+                                    Type messageListType = new TypeToken<List<BoxLastMessage>>(){}.getType();
+                                    List<BoxLastMessage> list = gson.fromJson(messagesArray, messageListType);
+                                    if(list != null)   ConversionBox(list);
+
+                                }catch (IOException e){
+                                    e.printStackTrace();
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                showToast("Lỗi dữ liệu");
+                            }
+                        });
+                    }
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
 
             }
         });
@@ -153,72 +231,71 @@ public class MainActivity extends AppCompatActivity implements ConversionListene
 
         if (list.size() != 0) {
             for(BoxLastMessage i : list){
-                  if(i.getId_nhomchat() != 0L){
+                  if(i.getId_groupchat() != 0){
                           if(CheckConversions(i)){
-                                Long senderid = i.getId_nguoigui();
-                                Long id_nhomchat = i.getId_nhomchat();
+                                int senderid = i.getId_sender();
+                                int id_nhomchat = i.getId_groupchat();
                                 Message chat = new Message();
-                                chat.setId_nhomchat(id_nhomchat);
-                                chat.setId_nguoigui(senderid);
-                                chat.setId_nguoinhan(0L);
-                                chat.setConversionID(id_nhomchat.toString());
-                                chat.setConversionName(i.getTennhom());
+                                chat.setId_group(id_nhomchat);
+                                chat.setId_sender(senderid);
+                                chat.setId_receiver(0);
+                                chat.setConversionID(String.valueOf(id_nhomchat));
+                                chat.setConversionName(i.getNamegroup());
                                 chat.setConversionImage(i.getImage());
-                                chat.setNoidung(i.getTinnhancuoi());
-                                chat.setThoigiantao(i.getThoigiantao());
+                                chat.setContent(i.getLastmessage());
+                                chat.setCreateAt(i.getCreateAt());
                                 conversations.add(chat);
 
                             }else{
                                 for(int j = 0 ; j <conversations.size() ; j++){
-                                    Long senderid = i.getId_nguoigui();
-                            Long id_nhomchat = i.getId_nhomchat();
-                            if(conversations.get(j).getId_nguoigui().equals(senderid) && conversations.get(j).getId_nhomchat().equals(id_nhomchat)){
-                                conversations.get(j).setNoidung(i.getTinnhancuoi());
-                                conversations.get(j).setThoigiantao(i.getThoigiantao());
-                                conversations.get(j).setConversionName(i.getTennhom());
+                                    int senderid = i.getId_sender();
+                            int id_nhomchat = i.getId_groupchat();
+                            if(conversations.get(j).getId_sender()==senderid && conversations.get(j).getId_group()== id_nhomchat){
+                                conversations.get(j).setContent(i.getLastmessage());
+                                conversations.get(j).setCreateAt(i.getCreateAt());
+                                conversations.get(j).setConversionName(i.getNamegroup());
                                 break;
                             }
                         }
                     }
               }else{
                   if(CheckConversions(i)){
-                      Long senderId = i.getId_nguoigui();
-                      Long receiderId = i.getId_nguoinhan();
+                      int senderId = i.getId_sender();
+                      int receiderId = i.getId_receiver();
                       Message chat = new Message();
-                      chat.setId_nguoigui(senderId);
-                      chat.setId_nguoinhan(receiderId);
-                      chat.setId_nhomchat(i.getId_nhomchat());
-                      if(preferenceManager.getString(Constants.KEY_USER_ID).equals(senderId.toString())){
+                      chat.setId_sender(senderId);
+                      chat.setId_receiver(receiderId);
+                      chat.setId_group(i.getId_groupchat());
+                      if(preferenceManager.getString(Constants.KEY_USER_ID).equals(String.valueOf(senderId))){
 
-                          chat.setConversionID(i.getId_nguoinhan().toString());
-                          chat.setConversionName(i.getTenreceider());
-                          chat.setConversionImage(i.getUrlreceider());
+                          chat.setConversionID(String.valueOf(i.getId_receiver()));
+                          chat.setConversionName(i.getNamreceiver());
+                          chat.setConversionImage(i.getUrlreceiver());
                       }
                       else{
 
-                          chat.setConversionID(i.getId_nguoigui().toString());
-                          chat.setConversionName(i.getTensender());
+                          chat.setConversionID(String.valueOf(i.getId_sender()));
+                          chat.setConversionName(i.getNamesender());
                           chat.setConversionImage(i.getUrlsender());
                       }
-                      chat.setNoidung(i.getTinnhancuoi());
-                      chat.setThoigiantao(i.getThoigiantao());
+                      chat.setContent(i.getLastmessage());
+                      chat.setCreateAt(i.getCreateAt());
                       conversations.add(chat);
                   }
                   else{
                       for(int j = 0 ; j <conversations.size() ; j++){
-                          Long senderid = i.getId_nguoigui();
-                          Long receiderid = i.getId_nguoinhan();
-                          if(conversations.get(j).getId_nguoigui().equals(senderid) && conversations.get(j).getId_nguoinhan().equals(receiderid)){
-                              conversations.get(j).setNoidung(i.getTinnhancuoi());
-                              conversations.get(j).setThoigiantao(i.getThoigiantao());
-                              conversations.get(j).setConversionName(i.getTenreceider());
+                          int senderid = i.getId_sender();
+                          int receiderid = i.getId_receiver();
+                          if(conversations.get(j).getId_sender() == senderid && conversations.get(j).getId_receiver() == receiderid){
+                              conversations.get(j).setContent(i.getLastmessage());
+                              conversations.get(j).setCreateAt(i.getCreateAt());
                               break;
                           }
                       }
                   }
               }
             }
-            Collections.sort(conversations , (obj1 ,obj2) ->obj2.getThoigiantao().compareTo(obj1.getThoigiantao()));
+            Collections.sort(conversations , (obj1 ,obj2) ->obj2.getCreateAt().compareTo(obj1.getCreateAt()));
             conversationsAdapter.notifyDataSetChanged();
             binding.conversationsRecyclerView.smoothScrollToPosition(0);
             binding.conversationsRecyclerView.setVisibility(View.VISIBLE);
@@ -227,16 +304,16 @@ public class MainActivity extends AppCompatActivity implements ConversionListene
     }
     private boolean CheckConversions(BoxLastMessage box){
         boolean add = true;
-        if(box.getId_nhomchat() !=0L){
+        if(box.getId_groupchat() !=0L){
             for(int i = 0 ; i < conversations.size(); i++){
-                if(conversations.get(i).getId_nhomchat().equals(box.getId_nhomchat())){
+                if(conversations.get(i).getId_group() ==box.getId_groupchat()){
                     add = false;
                     break;
                 }
             }
         }else{
             for(int i = 0 ; i < conversations.size(); i++){
-                if(conversations.get(i).getId_nguoigui().equals(box.getId_nguoigui()) && conversations.get(i).getId_nguoinhan().equals(box.getId_nguoinhan())){
+                if(conversations.get(i).getId_sender()== box.getId_sender() && conversations.get(i).getId_receiver()==box.getId_receiver()){
                     add = false;
                     break;
                 }
@@ -246,7 +323,8 @@ public class MainActivity extends AppCompatActivity implements ConversionListene
     }
     private void SetTrangThai() {
         UserModel us = new UserModel();
-        us.setId(Long.parseLong(preferenceManager.getString(Constants.KEY_USER_ID)));
+        us.setId(Integer.parseInt(preferenceManager.getString(Constants.KEY_USER_ID)));
+        us.setStatus(1);
         SetOnlineAPI.setOnlineapi.SetOnl(us)
                 .enqueue(new Callback<UserModel>() {
                     @Override
@@ -264,7 +342,8 @@ public class MainActivity extends AppCompatActivity implements ConversionListene
     private void signOut() {
         showToast("Signing out...");
         UserModel us = new UserModel();
-        us.setId(Long.parseLong(preferenceManager.getString(Constants.KEY_USER_ID)));
+        us.setId(Integer.parseInt(preferenceManager.getString(Constants.KEY_USER_ID)));
+        us.setStatus(0);
         SetOfflineAPI.setoffAPI.Setoff(us)
                 .enqueue(new Callback<UserModel>() {
                     @Override

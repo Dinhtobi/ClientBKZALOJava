@@ -19,12 +19,21 @@ import com.example.bkzalo.models.Group;
 import com.example.bkzalo.models.UserModel;
 import com.example.bkzalo.utilities.Constants;
 import com.example.bkzalo.utilities.PreferenceManager;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 
+import java.io.IOException;
+import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -33,7 +42,7 @@ public class AddMemberActivity extends AppCompatActivity implements CheckAddList
     private ActivityAddMemberBinding binding;
     private PreferenceManager preferenceManager;
     private AddMemberAdapter addMemberAdapter;
-    private List<Long> IdMember = new ArrayList<>();
+    private List<Integer> IdMember = new ArrayList<>();
     private Group groupreceived;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +56,7 @@ public class AddMemberActivity extends AppCompatActivity implements CheckAddList
         getUsers();
         SearchChangeListener();
     }
+    // Set hành động cho giao diện
     private void SetListeners() {
         binding.imageBack.setOnClickListener(v -> onBackPressed());
         binding.imageadd.setOnClickListener(v->{
@@ -54,17 +64,18 @@ public class AddMemberActivity extends AppCompatActivity implements CheckAddList
             onBackPressed();
         });
     }
+    // Thêm thành viên
     private  void AddMember(){
-        List<Long> listnewmember = IdMember;
-        Long id_nhomchat = groupreceived.getId_nhomchat();
+        List<Integer> listnewmember = IdMember;
+        int id_nhomchat = groupreceived.getId();
         for(int i =0 ; i<listnewmember.size(); i++){
             DetailGroup newmember = new DetailGroup();
-            newmember.setId_nhomchat(id_nhomchat);
-            newmember.setId_nguoidung(listnewmember.get(i));
+            newmember.setId_groupchat(id_nhomchat);
+            newmember.setId_user(listnewmember.get(i));
             Date dnow = new Date();
             SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss");
-            newmember.setThoigianthamgia(ft.format(dnow));
-            newmember.setTrangthai(1);
+            newmember.setTimejoin(ft.format(dnow));
+            newmember.setStatus(1);
             DetailGroupAPI.detailgroupapi.adduseringroup(newmember).enqueue(new Callback<DetailGroup>() {
                 @Override
                 public void onResponse(Call<DetailGroup> call, Response<DetailGroup> response) {
@@ -82,26 +93,47 @@ public class AddMemberActivity extends AppCompatActivity implements CheckAddList
 
     }
     private List<UserModel> users = new ArrayList<>();
-
+    // Lấy danh sách người dùng khác nhóm
     private void getUsers() {
         loading(true);
-        ListMemberGroupAPI.listMemberGroupApi.listmember(groupreceived).enqueue(new Callback<List<UserModel>>() {
+        ListMemberGroupAPI.listMemberGroupApi.listmember(groupreceived).enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(Call<List<UserModel>> call, Response<List<UserModel>> response) {
-                List<UserModel> useringroup = response.body();
-                GetUsersAPI.getuserapi.GetList().enqueue(new Callback<List<UserModel>>() {
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                ResponseBody responseBody = response.body();
+                try {
+                    String jsonString = responseBody.string();
+                    Gson gson = new GsonBuilder().create();
+                    JsonObject jsonObject = gson.fromJson(jsonString, JsonObject.class);
+                    List<UserModel> useringroup;
+                    JsonElement messageElement = jsonObject.get("users");
+
+                    if (messageElement != null && messageElement.isJsonArray()) {
+                        JsonArray UserModelArray = messageElement.getAsJsonArray();
+                        Type UserModelListType = new TypeToken<List<UserModel>>(){}.getType();
+                        useringroup = gson.fromJson(UserModelArray, UserModelListType);
+                    } else {
+                        useringroup = new ArrayList<>(); // Hoặc giá trị mặc định tùy vào yêu cầu của bạn
+                    }
+                GetUsersAPI.getuserapi.GetList("All").enqueue(new Callback<ResponseBody>() {
                     @Override
-                    public void onResponse(Call<List<UserModel>> call, Response<List<UserModel>> response) {
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                         loading(false);
-                        List<UserModel> listus = response.body();
+                        ResponseBody responseBody = response.body();
+                        try{
+                            String jsonString = responseBody.string();
+                            Gson gson = new GsonBuilder().create();
+                            JsonObject jsonObject = gson.fromJson(jsonString, JsonObject.class);
+                            JsonArray usersArray = jsonObject.getAsJsonArray("users");
+                            Type userListType = new TypeToken<List<UserModel>>(){}.getType();
+                            List<UserModel> listus = gson.fromJson(usersArray, userListType);
                         if (response.body() != null) {
                             for (int i = 0; i < listus.size(); i++) {
                                 if (Checkmember(listus.get(i),useringroup)) {
                                     UserModel user = new UserModel();
-                                    user.setTen(listus.get(i).getTen());
+                                    user.setName(listus.get(i).getName());
                                     user.setEmail(listus.get(i).getEmail());
                                     user.setUrl(listus.get(i).getUrl());
-                                    user.setTrangthai(listus.get(i).getTrangthai());
+                                    user.setStatus(listus.get(i).getStatus());
                                     user.setId(listus.get(i).getId());
                                     users.add(user);
                                 }
@@ -116,18 +148,24 @@ public class AddMemberActivity extends AppCompatActivity implements CheckAddList
                         } else {
                             showErrorMessage();
                         }
+                        }catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
 
                     @Override
-                    public void onFailure(Call<List<UserModel>> call, Throwable t) {
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
 
                     }
 
                 });
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
             }
 
             @Override
-            public void onFailure(Call<List<UserModel>> call, Throwable t) {
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
 
             }
         });
@@ -148,7 +186,7 @@ public class AddMemberActivity extends AppCompatActivity implements CheckAddList
 
 
     @Override
-    public void onCheckClick(Long id_userModel) {
+    public void onCheckClick(int id_userModel) {
 
         if(IdMember.size()> 0){
             if(Checked(id_userModel)){
@@ -160,20 +198,21 @@ public class AddMemberActivity extends AppCompatActivity implements CheckAddList
             IdMember.add(id_userModel);
         }
     }
+    // kiểm tra thanh viên có trong nhóm không ?
     private boolean Checkmember(UserModel user , List<UserModel> listuser){
         boolean Added = true ;
         for(int i = 0 ; i<listuser.size(); i++){
-            if(user.getId().equals(listuser.get(i).getId())){
+            if(user.getId() == listuser.get(i).getId()){
                 Added = false;
                 break;
             }
         }
         return Added;
     }
-    private boolean Checked(Long id_userModel){
+    private boolean Checked(int id_userModel){
         boolean add = true;
         for(int i = 0 ; i<IdMember.size(); i++){
-            if(id_userModel.toString().equals(IdMember.get(i).toString())){
+            if(id_userModel == IdMember.get(i)){
                 add= false;
                 break;
             }
@@ -195,7 +234,7 @@ public class AddMemberActivity extends AppCompatActivity implements CheckAddList
                 List<UserModel> list = addMemberAdapter.GetData();
                 List<UserModel> listserach = new ArrayList<>();
                 for(int i = 0 ; i< list.size() ; i++){
-                    if(list.get(i).getTen().contains(search)){
+                    if(list.get(i).getName().contains(search)){
                         listserach.add(list.get(i));
                     }
                 }

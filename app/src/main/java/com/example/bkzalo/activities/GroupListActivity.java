@@ -14,13 +14,22 @@ import com.example.bkzalo.models.Group;
 import com.example.bkzalo.models.UserModel;
 import com.example.bkzalo.utilities.Constants;
 import com.example.bkzalo.utilities.PreferenceManager;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 
 
+import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -56,17 +65,35 @@ public class GroupListActivity extends AppCompatActivity implements GroupsListen
     }
     private void GetGroups(){
         UserModel user = new UserModel();
-        user.setId(Long.parseLong(preferenceManager.getString(Constants.KEY_USER_ID)));
+        user.setId(Integer.parseInt(preferenceManager.getString(Constants.KEY_USER_ID)));
 
-        ListGroupsAPI.listGroupsApi.listgroup(user).enqueue(new Callback<List<Group>>() {
+        ListGroupsAPI.listGroupsApi.listgroup(user).enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(Call<List<Group>> call, Response<List<Group>> response) {
-                List<Group> list = response.body();
-                GetListGroup(list);
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                ResponseBody responseBody = response.body();
+                try {
+                    String jsonString = responseBody.string();
+                    Gson gson = new GsonBuilder().create();
+                    JsonObject jsonObject = gson.fromJson(jsonString, JsonObject.class);
+                    List<Group> list;
+                    JsonElement messageElement = jsonObject.get("message");
+
+                    if (messageElement != null && messageElement.isJsonArray()) {
+                        JsonArray messagesArray = messageElement.getAsJsonArray();
+                        Type messageListType = new TypeToken<List<Group>>(){}.getType();
+                        list = gson.fromJson(messagesArray, messageListType);
+                    } else {
+                        list = new ArrayList<>(); // Hoặc giá trị mặc định tùy vào yêu cầu của bạn
+                    }
+                    GetListGroup(list);
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
+
             }
 
             @Override
-            public void onFailure(Call<List<Group>> call, Throwable t) {
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
                 showErrorMessage();
             }
         });
@@ -75,9 +102,9 @@ public class GroupListActivity extends AppCompatActivity implements GroupsListen
         if(list!=null){
             for(int i = 0 ; i< list.size(); i++){
                 Group group = new Group();
-                group.setId_nguoitao(list.get(i).getId_nguoitao());
-                group.setTennhom(list.get(i).getTennhom());
-                group.setId_nhomchat(list.get(i).getId_nhomchat());
+                group.setId_createdbyuser(list.get(i).getId_createdbyuser());
+                group.setNamegroup(list.get(i).getNamegroup());
+                group.setId(list.get(i).getId());
                 group.setImage(list.get(i).getImage());
                 group.setType("User");
                 if(CheckGroup(group)){
@@ -97,7 +124,7 @@ public class GroupListActivity extends AppCompatActivity implements GroupsListen
     }
     private void setListeners() {
         binding.imageBack.setOnClickListener(v -> onBackPressed());
-        binding.imageadd.setOnClickListener(v -> startActivity(new Intent(getApplicationContext(),AddGroup.class)));
+        binding.imageadd.setOnClickListener(v -> startActivity(new Intent(getApplicationContext(), AddGroupActivity.class)));
     }
     private void showErrorMessage() {
         binding.textErrorMessage.setText(String.format("%s", "Không có nhóm nào cả"));
@@ -129,7 +156,7 @@ public class GroupListActivity extends AppCompatActivity implements GroupsListen
     private boolean CheckGroup(Group group){
         boolean add = true ;
         for (int i = 0 ; i < groupList.size() ; i++){
-            if(groupList.get(i).getId_nhomchat().equals(group.getId_nhomchat())){
+            if(groupList.get(i).getId()== group.getId()){
                 add = false ;
                 break;
             }

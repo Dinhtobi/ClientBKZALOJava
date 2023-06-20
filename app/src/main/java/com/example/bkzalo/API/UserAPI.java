@@ -5,6 +5,7 @@ import com.example.bkzalo.utilities.Constants;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.http.Body;
@@ -17,8 +18,8 @@ public interface UserAPI {
         UserAPI userAPI = new Retrofit.Builder().baseUrl(Constants.KEY_API)
         .addConverterFactory(GsonConverterFactory.create(gson))
         .build().create(UserAPI.class);
-    @POST("Test-web/api-admin-user")
-    Call<UserModel>sendPost(@Body UserModel usermodel);
-    @PUT("Test-web/api-admin-user")
-    Call<UserModel> sendPut(@Body UserModel userModel);
+    @POST("/api/create-new-user")
+    Call<ResponseBody>sendPost(@Body UserModel usermodel);
+    @PUT("/api/edit-user")
+    Call<ResponseBody> sendPut(@Body UserModel userModel);
 }

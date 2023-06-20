@@ -5,6 +5,7 @@ import com.example.bkzalo.utilities.Constants;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -16,6 +17,6 @@ public interface SignInAPI {
     SignInAPI signinAPI = new Retrofit.Builder().baseUrl(Constants.KEY_API)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build().create(SignInAPI.class);
-    @POST("Test-web/api-admin-login")
-    Call<UserModel> sendPost(@Body UserModel userModel);
+    @POST("/api/login")
+    Call<ResponseBody> sendPost(@Body UserModel userModel);
 }

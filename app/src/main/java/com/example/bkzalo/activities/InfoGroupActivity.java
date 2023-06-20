@@ -9,7 +9,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.util.Base64;
 import android.view.View;
@@ -31,11 +30,18 @@ import com.example.bkzalo.models.UserModel;
 import com.example.bkzalo.utilities.Constants;
 import com.example.bkzalo.utilities.PreferenceManager;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.attribute.GroupPrincipal;
+import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -43,11 +49,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class InfoGroup extends AppCompatActivity implements BottomsheetListener {
+public class InfoGroupActivity extends AppCompatActivity implements BottomsheetListener {
 
     private ActivityInfoGroupBinding binding;
     private PreferenceManager preferenceManager;
@@ -64,11 +71,11 @@ public class InfoGroup extends AppCompatActivity implements BottomsheetListener 
         preferenceManager = new PreferenceManager(getApplicationContext());
         expandableListAdapter = new ExpandableListViewAdapter(this::BottomsheetClick);
         binding.imageBack.setEnabled(false);
+        groupreceived = (Group) getIntent().getSerializableExtra(Constants.KEY_GROUP);
         LoadGroup();
         setListener();
     }
     private void LoadGroup(){
-        groupreceived = (Group) getIntent().getSerializableExtra(Constants.KEY_GROUP);
         byte[] bytes = android.util.Base64.decode(groupreceived.getImage(), Base64.DEFAULT);
         Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
         binding.imageProfile.setImageBitmap(bitmap);
@@ -138,6 +145,7 @@ public class InfoGroup extends AppCompatActivity implements BottomsheetListener 
                             Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
                             binding.imageProfile.setImageBitmap(bitmap);
                             encodedImage = encodedImage(bitmap);
+                            groupreceived.setImage(encodedImage);
                         }catch (FileNotFoundException e) {
                             e.printStackTrace();
                         }
@@ -147,16 +155,16 @@ public class InfoGroup extends AppCompatActivity implements BottomsheetListener 
     );
     private void Update(){
         Group group = new Group();
-        group.setTennhom(binding.inputName.getText().toString());
+        group.setNamegroup(binding.inputName.getText().toString());
         group.setImage(encodedImage);
-        group.setId_nhomchat(groupreceived.getId_nhomchat());
+        group.setId(groupreceived.getId());
         group.setType("haveuser");
         GroupAPI.groupapi.updateGroup(group).enqueue(new Callback<String>() {
             @Override
             public void onResponse(Call<String> call, Response<String> response) {
                 showToast("Cập nhật thành công");
                 groupreceived.setImage(group.getImage());
-                groupreceived.setTennhom(group.getTennhom());
+                groupreceived.setNamegroup(group.getNamegroup());
                 LoadGroup();
             }
 
@@ -185,21 +193,35 @@ public class InfoGroup extends AppCompatActivity implements BottomsheetListener 
         GroupItem group = new GroupItem();
         group.setId(1);
         group.setName("Thành viên nhóm");
-        binding.inputName.setText(groupreceived.getTennhom());
+        binding.inputName.setText(groupreceived.getNamegroup());
         List<UserModel> listuser = new ArrayList<>();
-        ListMemberGroupAPI.listMemberGroupApi.listmember(groupreceived).enqueue(new Callback<List<UserModel>>() {
+        ListMemberGroupAPI.listMemberGroupApi.listmember(groupreceived).enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(Call<List<UserModel>> call, Response<List<UserModel>> response) {
-                List<UserModel> list = response.body();
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                ResponseBody responseBody = response.body();
+                try {
+                    String jsonString = responseBody.string();
+                    Gson gson = new GsonBuilder().create();
+                    JsonObject jsonObject = gson.fromJson(jsonString, JsonObject.class);
+                    List<UserModel> list;
+                    JsonElement messageElement = jsonObject.get("users");
+
+                    if (messageElement != null && messageElement.isJsonArray()) {
+                        JsonArray UserModelArray = messageElement.getAsJsonArray();
+                        Type UserModelListType = new TypeToken<List<UserModel>>(){}.getType();
+                        list = gson.fromJson(UserModelArray, UserModelListType);
+                    } else {
+                        list = new ArrayList<>(); // Hoặc giá trị mặc định tùy vào yêu cầu của bạn
+                    }
                 UserModel us = new UserModel();
                 for(int i = 0 ; i<list.size(); i++){
                     UserModel newmember = new UserModel();
-                    newmember.setTen(list.get(i).getTen());
+                    newmember.setName(list.get(i).getName());
                     newmember.setId(list.get(i).getId());
                     newmember.setUrl(list.get(i).getUrl());
-                    newmember.setTrangthai(list.get(i).getTrangthai());
+                    newmember.setStatus(list.get(i).getStatus());
                     listuser.add(newmember);
-                    if(list.get(i).getId().toString().equals(preferenceManager.getString(Constants.KEY_USER_ID))){
+                    if(String.valueOf(list.get(i).getId()).equals(preferenceManager.getString(Constants.KEY_USER_ID))){
                         us = list.get(i);
                     }
                 }
@@ -208,10 +230,13 @@ public class InfoGroup extends AppCompatActivity implements BottomsheetListener 
                 groups = new ArrayList<>(listMap.keySet());
                 expandableListAdapter.setData(groups,listMap,us);
                 binding.expandlistuser.setAdapter(expandableListAdapter);
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
             }
 
             @Override
-            public void onFailure(Call<List<UserModel>> call, Throwable t) {
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
 
             }
         });
@@ -231,49 +256,67 @@ public class InfoGroup extends AppCompatActivity implements BottomsheetListener 
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
         bottomSheetDialog.setContentView(viewdialog);
         bottomSheetDialog.show();
-        ListGroupsAPI.listGroupsApi.listgroup(us).enqueue(new Callback<List<Group>>() {
+        ListGroupsAPI.listGroupsApi.listgroup(us).enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(Call<List<Group>> call, Response<List<Group>> response) {
-                List<Group> list = response.body();
-                boolean nguoitao = false;
-                for(Group i : list){
-                    if(preferenceManager.getString(Constants.KEY_USER_ID).equals(i.getId_nguoitao().toString())){
-                        nguoitao = true;
-                        break;
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                ResponseBody responseBody = response.body();
+                try {
+                    String jsonString = responseBody.string();
+                    Gson gson = new GsonBuilder().create();
+                    JsonObject jsonObject = gson.fromJson(jsonString, JsonObject.class);
+                    List<Group> list;
+                    JsonElement messageElement = jsonObject.get("message");
+
+                    if (messageElement != null && messageElement.isJsonArray()) {
+                        JsonArray messagesArray = messageElement.getAsJsonArray();
+                        Type messageListType = new TypeToken<List<Group>>(){}.getType();
+                        list = gson.fromJson(messagesArray, messageListType);
+                    } else {
+                        list = new ArrayList<>(); // Hoặc giá trị mặc định tùy vào yêu cầu của bạn
                     }
-                }
-                if(preferenceManager.getString(Constants.KEY_USER_ID).equals(us.getId().toString())){
-                    viewdialog.findViewById(R.id.btout).setVisibility(View.VISIBLE);
-                    viewdialog.findViewById(R.id.btchat).setVisibility(View.GONE);
-                }else if(nguoitao){
-                    viewdialog.findViewById(R.id.btroll).setVisibility(View.VISIBLE);
-                    viewdialog.findViewById(R.id.btdel).setVisibility(View.VISIBLE);
+                    boolean nguoitao = false;
+                    for(Group i : list){
+                        if(preferenceManager.getString(Constants.KEY_USER_ID).equals(String.valueOf(i.getId_createdbyuser()))){
+                            nguoitao = true;
+                            break;
+                        }
+                    }
+                    if(preferenceManager.getString(Constants.KEY_USER_ID).equals(String.valueOf(us.getId()))){
+                        viewdialog.findViewById(R.id.btout).setVisibility(View.VISIBLE);
+                        viewdialog.findViewById(R.id.btchat).setVisibility(View.GONE);
+                    }else if(nguoitao){
+                        viewdialog.findViewById(R.id.btroll).setVisibility(View.VISIBLE);
+                        viewdialog.findViewById(R.id.btdel).setVisibility(View.VISIBLE);
+                    }
+
+                    viewdialog.findViewById(R.id.btdel).setOnClickListener(v->{
+                        Del(us);
+                        bottomSheetDialog.dismiss();
+                    });
+                    viewdialog.findViewById(R.id.btroll).setOnClickListener(v->{
+                        ChangeAdmin(us);
+                        bottomSheetDialog.dismiss();
+                    });
+                    boolean finalNguoitao = nguoitao;
+                    viewdialog.findViewById(R.id.btout).setOnClickListener(v->{
+                        if(finalNguoitao && expandableListAdapter.getChildrenCount(0) >1){
+                            showToast("Chuyển quyền quản trị viên cho người khác");
+                            bottomSheetDialog.dismiss();
+                        }else{
+                            Del(us);
+                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                            startActivity(intent);
+                            finish();
+                        }
+                    });
+                    viewdialog.findViewById(R.id.btchat).setOnClickListener(v->Chat(us));
+                }catch (IOException e){
+                    e.printStackTrace();
                 }
 
-                viewdialog.findViewById(R.id.btdel).setOnClickListener(v->{
-                    Del(us);
-                    bottomSheetDialog.dismiss();
-                });
-                viewdialog.findViewById(R.id.btroll).setOnClickListener(v->{
-                    ChangeAdmin(us);
-                    bottomSheetDialog.dismiss();
-                });
-                boolean finalNguoitao = nguoitao;
-                viewdialog.findViewById(R.id.btout).setOnClickListener(v->{
-                    if(finalNguoitao && expandableListAdapter.getGroupCount() >1){
-                        showToast("Chuyển quyền quản trị viên cho người khác");
-                        bottomSheetDialog.dismiss();
-                    }else{
-                        Del(us);
-                        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                        startActivity(intent);
-                        finish();
-                    }
-                });
-                viewdialog.findViewById(R.id.btchat).setOnClickListener(v->Chat(us));
             }
             @Override
-            public void onFailure(Call<List<Group>> call, Throwable t) {
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
 
             }
         });
@@ -287,8 +330,8 @@ public class InfoGroup extends AppCompatActivity implements BottomsheetListener 
     }
     public void ChangeAdmin(UserModel us){
         Group group = new Group() ;
-        group.setId_nhomchat(groupreceived.getId_nhomchat());
-        group.setId_nguoitao(us.getId());
+        group.setId(groupreceived.getId());
+        group.setId_createdbyuser(us.getId());
         group.setType("haveuser");
         GroupAPI.groupapi.updateGroup(group).enqueue(new Callback<String>() {
             @Override
@@ -307,19 +350,17 @@ public class InfoGroup extends AppCompatActivity implements BottomsheetListener 
     }
     public void Del(UserModel us){
         DetailGroup detailGroup = new DetailGroup() ;
-        detailGroup.setId_nhomchat(groupreceived.getId_nhomchat());
-        detailGroup.setId_nguoidung(us.getId());
+        detailGroup.setId_groupchat(groupreceived.getId());
+        detailGroup.setId_user(us.getId());
         Date dnow = new Date();
         SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss");
-        detailGroup.setThoigianroikhoi(ft.format(dnow));
-        detailGroup.setTrangthai(0);
+        detailGroup.setTimeout(ft.format(dnow));
+        detailGroup.setStatus(0);
         DetailGroupAPI.detailgroupapi.updateuseringroup(detailGroup).enqueue(new Callback<String>() {
             @Override
             public void onResponse(Call<String> call, Response<String> response) {
-                if(response.body() != null){
                     LoadGroup();
                     showToast("Đã xoá");
-                }
             }
 
             @Override

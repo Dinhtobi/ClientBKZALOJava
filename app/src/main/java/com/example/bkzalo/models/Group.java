@@ -6,47 +6,39 @@ import java.io.Serializable;
 import java.util.List;
 
 public class Group implements Serializable {
-    @SerializedName("id_nguoitao")
-    private Long id_nguoitao;
-    @SerializedName("tennhom")
-    private String tennhom ;
-    @SerializedName("id_nhomchat")
-    private Long id_nhomchat;
+    @SerializedName("id_createdbyuser")
+    private int id_createdbyuser;
+    @SerializedName("namegroup")
+    private String namegroup ;
+    @SerializedName("id")
+    private int id;
     @SerializedName("image")
     private String image;
     @SerializedName("type")
     private String type;
 
-    public String getType() {
-        return type;
+    public int getId_createdbyuser() {
+        return id_createdbyuser;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setId_createdbyuser(int id_createdbyuser) {
+        this.id_createdbyuser = id_createdbyuser;
     }
 
-    public Long getId_nguoitao() {
-        return id_nguoitao;
+    public String getNamegroup() {
+        return namegroup;
     }
 
-    public void setId_nguoitao(Long id_nguoitao) {
-        this.id_nguoitao = id_nguoitao;
+    public void setNamegroup(String namegroup) {
+        this.namegroup = namegroup;
     }
 
-    public String getTennhom() {
-        return tennhom;
+    public int getId() {
+        return id;
     }
 
-    public void setTennhom(String tennhom) {
-        this.tennhom = tennhom;
-    }
-
-    public Long getId_nhomchat() {
-        return id_nhomchat;
-    }
-
-    public void setId_nhomchat(Long id_nhomchat) {
-        this.id_nhomchat = id_nhomchat;
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getImage() {
@@ -55,5 +47,13 @@ public class Group implements Serializable {
 
     public void setImage(String image) {
         this.image = image;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

@@ -22,7 +22,7 @@
                 android:value="" />
         </activity>
         <activity
-            android:name=".activities.InfoGroup"
+            android:name=".activities.InfoGroupActivity"
             android:exported="false">
             <meta-data
                 android:name="android.app.lib_name"
@@ -51,7 +51,7 @@
                 android:value="" />
         </activity>
         <activity
-            android:name=".activities.AddGroup"
+            android:name=".activities.AddGroupActivity"
             android:exported="false">
             <meta-data
                 android:name="android.app.lib_name"

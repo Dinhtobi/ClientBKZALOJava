@@ -5,119 +5,95 @@ import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 
 public class BoxLastMessage implements Serializable {
-    @SerializedName("id_hopchat")
-    private Long id_hopchat ;
-    @SerializedName("id_nguoigui")
-    private Long id_nguoigui;
-    @SerializedName("id_nguoinhan")
-    private Long id_nguoinhan;
-    @SerializedName("tinnhancuoi")
-    private String tinnhancuoi;
-    @SerializedName("thoigiantao")
-    private String thoigiantao;
-    @SerializedName("tensender")
-    private String tensender;
-    @SerializedName("tenreceider")
-    private String tenreceider;
+    @SerializedName("id")
+    private int id ;
+    @SerializedName("id_sender")
+    private int id_sender;
+    @SerializedName("id_receiver")
+    private int id_receiver;
+    @SerializedName("lastmessage")
+    private String lastmessage;
+    @SerializedName("createAt")
+    private String createAt;
+    @SerializedName("namesender")
+    private String namesender;
+    @SerializedName("namreceiver")
+    private String namreceiver;
     @SerializedName("urlsender")
     private String urlsender;
-    @SerializedName("urlreceider")
-    private String urlreceider;
-    @SerializedName("id_nhomchat")
-    private Long id_nhomchat;
-    @SerializedName("tennhom")
-    private String tennhom ;
+    @SerializedName("urlreceiver")
+    private String urlreceiver;
+    @SerializedName("id_groupchat")
+    private int id_groupchat;
+    @SerializedName("namegroup")
+    private String namegroup ;
     @SerializedName("image")
     private String image;
-
-    public String getTennhom() {
-        return tennhom;
-    }
-
-    public void setTennhom(String tennhom) {
-        this.tennhom = tennhom;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
-
-    public Long getId_nhomchat() {
-        return id_nhomchat;
-    }
-
-    public void setId_nhomchat(Long id_nhomchat) {
-        this.id_nhomchat = id_nhomchat;
-    }
-
-    private String type;
+    @SerializedName("type")
+    private String Type;
 
     public String getType() {
-        return type;
+        return Type;
     }
 
     public void setType(String type) {
-        this.type = type;
+        Type = type;
     }
 
-    public Long getId_hopchat() {
-        return id_hopchat;
+    public int getId() {
+        return id;
     }
 
-    public void setId_hopchat(Long id_hopchat) {
-        this.id_hopchat = id_hopchat;
+    public void setId(int id) {
+        this.id = id;
     }
 
-    public Long getId_nguoigui() {
-        return id_nguoigui;
+    public int getId_sender() {
+        return id_sender;
     }
 
-    public void setId_nguoigui(Long id_nguoigui) {
-        this.id_nguoigui = id_nguoigui;
+    public void setId_sender(int id_sender) {
+        this.id_sender = id_sender;
     }
 
-    public Long getId_nguoinhan() {
-        return id_nguoinhan;
+    public int getId_receiver() {
+        return id_receiver;
     }
 
-    public void setId_nguoinhan(Long id_nguoinhan) {
-        this.id_nguoinhan = id_nguoinhan;
+    public void setId_receiver(int id_receiver) {
+        this.id_receiver = id_receiver;
     }
 
-    public String getTinnhancuoi() {
-        return tinnhancuoi;
+    public String getLastmessage() {
+        return lastmessage;
     }
 
-    public void setTinnhancuoi(String tinnhancuoi) {
-        this.tinnhancuoi = tinnhancuoi;
+    public void setLastmessage(String lastmessage) {
+        this.lastmessage = lastmessage;
     }
 
-    public String getThoigiantao() {
-        return thoigiantao;
+    public String getCreateAt() {
+        return createAt;
     }
 
-    public void setThoigiantao(String thoigiantao) {
-        this.thoigiantao = thoigiantao;
+    public void setCreateAt(String createAt) {
+        this.createAt = createAt;
     }
 
-    public String getTensender() {
-        return tensender;
+    public String getNamesender() {
+        return namesender;
     }
 
-    public void setTensender(String tensender) {
-        this.tensender = tensender;
+    public void setNamesender(String namesender) {
+        this.namesender = namesender;
     }
 
-    public String getTenreceider() {
-        return tenreceider;
+    public String getNamreceiver() {
+        return namreceiver;
     }
 
-    public void setTenreceider(String tenreceider) {
-        this.tenreceider = tenreceider;
+    public void setNamreceiver(String namreceiver) {
+        this.namreceiver = namreceiver;
     }
 
     public String getUrlsender() {
@@ -128,11 +104,35 @@ public class BoxLastMessage implements Serializable {
         this.urlsender = urlsender;
     }
 
-    public String getUrlreceider() {
-        return urlreceider;
+    public String getUrlreceiver() {
+        return urlreceiver;
     }
 
-    public void setUrlreceider(String urlreceider) {
-        this.urlreceider = urlreceider;
+    public void setUrlreceiver(String urlreceiver) {
+        this.urlreceiver = urlreceiver;
+    }
+
+    public int getId_groupchat() {
+        return id_groupchat;
+    }
+
+    public void setId_groupchat(int id_groupchat) {
+        this.id_groupchat = id_groupchat;
+    }
+
+    public String getNamegroup() {
+        return namegroup;
+    }
+
+    public void setNamegroup(String namegroup) {
+        this.namegroup = namegroup;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 }

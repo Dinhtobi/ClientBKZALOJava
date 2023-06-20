@@ -17,8 +17,8 @@ public interface DetailGroupAPI {
     DetailGroupAPI detailgroupapi = new Retrofit.Builder().baseUrl(Constants.KEY_API)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build().create(DetailGroupAPI.class);
-    @POST("Test-web/api-admin-detailgroupchat")
+    @POST("/api/create-detailgroupchat")
     Call<DetailGroup> adduseringroup(@Body DetailGroup detailGroup );
-    @PUT("Test-web/api-admin-detailgroupchat")
+    @PUT("/api/update-detailgroupchat")
     Call<String>  updateuseringroup(@Body DetailGroup detailGroup);
 }

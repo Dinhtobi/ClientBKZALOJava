@@ -19,11 +19,16 @@ import com.example.bkzalo.databinding.ActivitySignUpBinding;
 import com.example.bkzalo.models.UserModel;
 import com.example.bkzalo.utilities.Constants;
 import com.example.bkzalo.utilities.PreferenceManager;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -62,29 +67,35 @@ public class SignUpActivity extends AppCompatActivity {
     private void signUp(){
         loading(true);
         UserModel us = new UserModel();
-        us.setTen(binding.inputName.getText().toString());
+        us.setName(binding.inputName.getText().toString());
         us.setUrl(encodedImage);
         us.setEmail(binding.inputPhone.getText().toString());
         us.setPassword(binding.inputPassword.getText().toString());
         UserAPI.userAPI.sendPost(us)
-                .enqueue(new Callback<UserModel>() {
+                .enqueue(new Callback<ResponseBody>() {
                     @Override
-                    public void onResponse(Call<UserModel> call, Response<UserModel> response) {
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                     loading(false);
-                    UserModel usrespose = response.body();
-                    preferenceManager.putBoolean(Constants.KEY_IS_SIGNED_IN, true);
-                        preferenceManager.putString(Constants.KEY_USER_ID, usrespose.getId().toString());
+                        ResponseBody responseBody = response.body();
+                        try {
+                            String jsonString = responseBody.string();
+                            Gson gson = new GsonBuilder().create();
+                            JsonObject jsonObject = gson.fromJson(jsonString, JsonObject.class);
+                            UserModel user = gson.fromJson(jsonObject.getAsJsonObject("message"), UserModel.class);
+                            preferenceManager.putBoolean(Constants.KEY_IS_SIGNED_IN, true);
+                        preferenceManager.putString(Constants.KEY_USER_ID, String.valueOf(user.getId()));
                         preferenceManager.putString(Constants.KEY_NAME, binding.inputName.getText().toString());
                         preferenceManager.putString(Constants.KEY_IMAGE, encodedImage);
-                        preferenceManager.putString(Constants.KEY_EMAIL,usrespose.getEmail());
-                        preferenceManager.putString(Constants.KEY_PASSWORD, usrespose.getPassword());
+                        preferenceManager.putString(Constants.KEY_EMAIL,user.getEmail());
                         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(intent);
-                    }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }}
 
                     @Override
-                    public void onFailure(Call<UserModel> call, Throwable t) {
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
                         loading(false);
                     showToast("Đăng kí không thành công");
                     }

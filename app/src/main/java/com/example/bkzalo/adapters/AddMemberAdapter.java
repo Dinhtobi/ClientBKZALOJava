@@ -61,7 +61,7 @@ public class AddMemberAdapter extends RecyclerView.Adapter<AddMemberAdapter.AddG
         }
 
         void setGroupData(UserModel userModel) {
-            binding.textName.setText(userModel.getTen());
+            binding.textName.setText(userModel.getName());
             binding.imageProfile.setImageBitmap(getUserImage(
                     userModel.getUrl()
             ));

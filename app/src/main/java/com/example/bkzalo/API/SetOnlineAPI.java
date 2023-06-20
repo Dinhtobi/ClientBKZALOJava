@@ -20,8 +20,7 @@ public interface SetOnlineAPI {
     SetOnlineAPI setOnlineapi = new Retrofit.Builder().baseUrl(Constants.KEY_API)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build().create(SetOnlineAPI.class);
-    @POST("Test-web/api-admin-online")
+    @POST("/api/set-status-user")
     Call<UserModel> SetOnl(@Body UserModel userModel);
-    @GET("Test-web/api-admin-online")
-    Call<List<UserModel>> ListOnl();
+
 }

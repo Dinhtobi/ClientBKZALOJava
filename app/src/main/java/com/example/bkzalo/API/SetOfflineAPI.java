@@ -16,6 +16,6 @@ public interface SetOfflineAPI {
     SetOfflineAPI setoffAPI = new Retrofit.Builder().baseUrl(Constants.KEY_API)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build().create(SetOfflineAPI.class);
-    @POST("Test-web/api-admin-offline")
+    @POST("/api/set-status-user")
     Call<UserModel> Setoff(@Body UserModel userModel);
 }

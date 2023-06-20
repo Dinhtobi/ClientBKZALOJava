@@ -60,12 +60,12 @@ public class RecentConversionsAdapter extends RecyclerView.Adapter<RecentConvers
         void setData(Message chatMessage) {
             binding.imageProfile.setImageBitmap(getConversionImage(chatMessage.getConversionImage()));
             binding.textName.setText(chatMessage.getConversionName());
-            binding.textRecentMessage.setText(chatMessage.getNoidung());
-            if(chatMessage.getId_nhomchat() != 0L){
+            binding.textRecentMessage.setText(chatMessage.getContent());
+            if(chatMessage.getId_group() != 0){
                 binding.getRoot().setOnClickListener(v -> {
                     Group group = new Group();
-                    group.setId_nhomchat(chatMessage.getId_nhomchat());
-                    group.setTennhom(chatMessage.getConversionName());
+                    group.setId(chatMessage.getId_group());
+                    group.setNamegroup(chatMessage.getConversionName());
                     group.setImage(chatMessage.getConversionImage());
                     group.setType("User");
                     conversionListener.onConversionGroupClicked(group);
@@ -73,8 +73,8 @@ public class RecentConversionsAdapter extends RecyclerView.Adapter<RecentConvers
             }else{
                 binding.getRoot().setOnClickListener(v -> {
                     UserModel usermodel = new UserModel();
-                    usermodel.setId(Long.parseLong(chatMessage.getConversionID()));
-                    usermodel.setTen(chatMessage.getConversionName());
+                    usermodel.setId(Integer.parseInt(chatMessage.getConversionID()));
+                    usermodel.setName(chatMessage.getConversionName());
                     usermodel.setUrl(chatMessage.getConversionImage());
                     conversionListener.onConversionUserClicked(usermodel);
                 });

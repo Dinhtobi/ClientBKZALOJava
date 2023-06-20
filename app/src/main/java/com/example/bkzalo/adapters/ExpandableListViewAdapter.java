@@ -99,10 +99,10 @@ public class ExpandableListViewAdapter  extends BaseExpandableListAdapter {
         TextView tvuser =convertView.findViewById(R.id.textName);
         RoundedImageView imageView = convertView.findViewById(R.id.imageProfile);
         UserModel us = listuser.get(listgroup.get(groupPosition)).get(childPosition);
-        if(us.getId().equals(isme.getId())){
+        if(us.getId() == isme.getId()){
             tvuser.setText("Bạn");
         }else{
-            tvuser.setText(us.getTen());
+            tvuser.setText(us.getName());
         }
         byte[] bytes = android.util.Base64.decode(us.getUrl(), Base64.DEFAULT);
         Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);

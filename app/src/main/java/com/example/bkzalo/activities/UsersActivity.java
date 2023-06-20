@@ -13,10 +13,18 @@ import com.example.bkzalo.listeners.UserListener;
 import com.example.bkzalo.models.UserModel;
 import com.example.bkzalo.utilities.Constants;
 import com.example.bkzalo.utilities.PreferenceManager;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 
+import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -45,42 +53,52 @@ public class UsersActivity extends AppCompatActivity implements UserListener {
     private List<UserModel> users = new ArrayList<>();
     private void getUsers() {
         loading(true);
-
-        GetUsersAPI.getuserapi.GetList().enqueue(new Callback<List<UserModel>>() {
+        GetUsersAPI.getuserapi.GetList("All").enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(Call<List<UserModel>> call, Response<List<UserModel>> response) {
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 loading(false);
-                List<UserModel> listus = response.body();
-                String currentUserId = preferenceManager.getString(Constants.KEY_USER_ID);
-                if(response.body() != null){
-                    for(int i = 0; i< listus.size(); i++) {
-                        if (!currentUserId.equals(listus.get(i).getId().toString())) {
-                            UserModel user = new UserModel();
-                            user.setTen(listus.get(i).getTen());
-                            user.setEmail(listus.get(i).getEmail());
-                            user.setUrl(listus.get(i).getUrl());
-                            user.setTrangthai(listus.get(i).getTrangthai());
-                            user.setId(listus.get(i).getId());
-                            users.add(user);
-                        }
+                ResponseBody responseBody = response.body();
+                try{
+                    String jsonString = responseBody.string();
+                    Gson gson = new GsonBuilder().create();
+                    JsonObject jsonObject = gson.fromJson(jsonString, JsonObject.class);
+                    JsonArray usersArray = jsonObject.getAsJsonArray("users");
+                    Type userListType = new TypeToken<List<UserModel>>(){}.getType();
+                    List<UserModel> userList = gson.fromJson(usersArray, userListType);
+                    String currentUserId = preferenceManager.getString(Constants.KEY_USER_ID);
+                    if(response.body() != null){
+                        for(int i = 0; i< userList.size(); i++) {
+                            if (!currentUserId.equals(String.valueOf(userList.get(i).getId()))) {
+                                UserModel user = new UserModel();
+                                user.setName(userList.get(i).getName());
+                                user.setEmail(userList.get(i).getEmail());
+                                user.setUrl(userList.get(i).getUrl());
+                                user.setStatus(userList.get(i).getStatus());
+                                user.setId(userList.get(i).getId());
+                                users.add(user);
+                            }
 
-                    }
-                    if(users.size() > 0 ){
-                        usersAdapter.setData(users);
-                        binding.usersRecyclerView.setAdapter(usersAdapter);
-                        binding.usersRecyclerView.setVisibility(View.VISIBLE);
+                        }
+                        if(users.size() > 0 ){
+                            usersAdapter.setData(users);
+                            binding.usersRecyclerView.setAdapter(usersAdapter);
+                            binding.usersRecyclerView.setVisibility(View.VISIBLE);
+                        }
+                        else{
+                            showErrorMessage();
+                        }
                     }
                     else{
                         showErrorMessage();
                     }
+                }catch (IOException e) {
+                    e.printStackTrace();
                 }
-                else{
-                    showErrorMessage();
-                }
+
             }
 
             @Override
-            public void onFailure(Call<List<UserModel>> call, Throwable t) {
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
 
             }
 

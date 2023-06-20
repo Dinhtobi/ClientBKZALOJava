@@ -7,47 +7,41 @@ import java.io.Serializable;
 public class UserModel implements Serializable {
 
     @SerializedName("id")
-    private Long id;
+    private int id;
 
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
-    @SerializedName("ten")
-    private String ten ;
-    @SerializedName("url")
-    private String url ;
+
+    @SerializedName("name")
+    private String name ;
+    @SerializedName("avatar")
+    private String avatar ;
     @SerializedName("email")
     private String email ;
-    @SerializedName("trangthai")
-    private int trangthai;
+    @SerializedName("status")
+    private int status;
+    @SerializedName("password")
+    private String password ;
 
-    public int getTrangthai() {
-        return trangthai;
+    public String getName() {
+        return name;
     }
 
-    public void setTrangthai(int trangthai) {
-        this.trangthai = trangthai;
-    }
-
-
-    public String getTen() {
-        return ten;
-    }
-
-    public void setTen(String ten) {
-        this.ten = ten;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getUrl() {
-        return url;
+        return avatar;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public void setUrl(String avatar) {
+        this.avatar = avatar;
     }
 
     public String getEmail() {
@@ -58,6 +52,14 @@ public class UserModel implements Serializable {
         this.email = email;
     }
 
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
     public String getPassword() {
         return password;
     }
@@ -65,7 +67,4 @@ public class UserModel implements Serializable {
     public void setPassword(String password) {
         this.password = password;
     }
-
-    @SerializedName("password")
-    private String password ;
 }

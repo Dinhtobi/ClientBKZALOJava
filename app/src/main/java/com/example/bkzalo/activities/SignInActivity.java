@@ -13,8 +13,14 @@ import com.example.bkzalo.databinding.ActivitySignInBinding;
 import com.example.bkzalo.models.UserModel;
 import com.example.bkzalo.utilities.Constants;
 import com.example.bkzalo.utilities.PreferenceManager;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 
 
+import java.io.IOException;
+
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -27,14 +33,12 @@ public class SignInActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        System.out.println("vitri 1");
         preferenceManager = new PreferenceManager(getApplicationContext());
       //  CheckLogout();
         if(preferenceManager.getBoolean(Constants.KEY_IS_SIGNED_IN)) {
             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
             startActivity(intent);
             finish();
-            System.out.println("vitri 2");
         }
         binding = ActivitySignInBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -56,40 +60,38 @@ public class SignInActivity extends AppCompatActivity {
         us.setEmail(binding.inputEmail.getText().toString());
         us.setPassword(binding.inputPassword.getText().toString());
         SignInAPI.signinAPI.sendPost(us)
-                .enqueue(new Callback<UserModel>() {
+                .enqueue(new Callback<ResponseBody>() {
                     @Override
-                    public void onResponse(Call<UserModel> call, Response<UserModel> response) {
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                         loading(false);
                         if(response.body() != null){
-                        UserModel userresponse = response.body();
-                        //lưu vào bộ nhớ đệm?
-                        preferenceManager.putBoolean(Constants.KEY_IS_SIGNED_IN, true);
-                        preferenceManager.putString(Constants.KEY_USER_ID, userresponse.getId().toString());
-                        preferenceManager.putString(Constants.KEY_NAME, userresponse.getTen());
-                        preferenceManager.putString(Constants.KEY_IMAGE, userresponse.getUrl());
-                        preferenceManager.putString(Constants.KEY_EMAIL,userresponse.getEmail());
-                        preferenceManager.putString(Constants.KEY_PASSWORD, userresponse.getPassword());
-                        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
+                            ResponseBody responseBody = response.body();
+                            try {
+                                String jsonString = responseBody.string();
+                                Gson gson = new GsonBuilder().create();
+                                JsonObject jsonObject = gson.fromJson(jsonString, JsonObject.class);
+                                UserModel user = gson.fromJson(jsonObject.getAsJsonObject("user"), UserModel.class);
+                                // lưu vào bộ nhớ đệm?
+                                preferenceManager.putBoolean(Constants.KEY_IS_SIGNED_IN, true);
+                                preferenceManager.putString(Constants.KEY_USER_ID, String.valueOf(user.getId()));
+                                preferenceManager.putString(Constants.KEY_NAME, user.getName());
+                                preferenceManager.putString(Constants.KEY_IMAGE, user.getUrl());
+                                preferenceManager.putString(Constants.KEY_EMAIL,user.getEmail());
+                                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                startActivity(intent);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                     }
                     }
 
                     @Override
-                    public void onFailure(Call<UserModel> call, Throwable t) {
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
                         loading(false);
                         showToast("Sai Email và mật khẩu");
                     }
                 });
-    }
-    public void CheckLogout(){
-        SharedPreferences sp = getSharedPreferences("DangNhap" , MODE_PRIVATE);
-        if(sp.contains("Logout")){
-            showToast(sp.getString("Logout",""));
-            SharedPreferences.Editor editor = sp.edit();
-            editor.remove("Logout");
-            editor.commit();
-        }
     }
     private void loading(Boolean isLoading){
         if(isLoading){
@@ -110,10 +112,6 @@ public class SignInActivity extends AppCompatActivity {
             showToast("Nhập Email");
             return false;
         }
-//        else if(!Patterns.EMAIL_ADDRESS.matcher(binding.inputEmail.getText().toString()).matches()) {
-//            showToast("Xác thực Email");
-//            return false;
-//        }
         else if(binding.inputPassword.getText().toString().trim().isEmpty()) {
             showToast("Nhập mật khẩu");
             return false;

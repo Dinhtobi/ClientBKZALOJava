@@ -19,11 +19,16 @@ import com.example.bkzalo.databinding.ActivityProfileUserBinding;
 import com.example.bkzalo.models.UserModel;
 import com.example.bkzalo.utilities.Constants;
 import com.example.bkzalo.utilities.PreferenceManager;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -47,12 +52,12 @@ public class ProfileUserActivity extends AppCompatActivity {
     private void LoadprofileUser(){
         binding.inputName.setText(preferenceManager.getString(Constants.KEY_NAME));
         binding.inputemail.setText(preferenceManager.getString(Constants.KEY_EMAIL));
-        binding.inputPassword.setText(preferenceManager.getString(Constants.KEY_PASSWORD));
+//        binding.inputPassword.setText("1");
         byte[] bytes = android.util.Base64.decode(preferenceManager.getString(Constants.KEY_IMAGE), Base64.DEFAULT);
         Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
         binding.imageProfile.setImageBitmap(bitmap);
         encodedImage = encodedImage(bitmap);
-        binding.inputConfirmPassword.setText(preferenceManager.getString(Constants.KEY_PASSWORD));
+//        binding.inputConfirmPassword.setText("1");
     }
     private void setListener(){
         binding.imageupdate.setOnClickListener(v->UpdateProfileClick());
@@ -126,27 +131,40 @@ public class ProfileUserActivity extends AppCompatActivity {
     );
     private void Update(){
         UserModel us = new UserModel();
-        us.setId(Long.parseLong(preferenceManager.getString(Constants.KEY_USER_ID)));
+        us.setId(Integer.parseInt(preferenceManager.getString(Constants.KEY_USER_ID)));
         us.setUrl(encodedImage);
-        us.setTen(binding.inputName.getText().toString());
+        us.setName(binding.inputName.getText().toString());
         us.setEmail(binding.inputemail.getText().toString());
         us.setPassword(binding.inputPassword.getText().toString());
-        UserAPI.userAPI.sendPut(us).enqueue(new Callback<UserModel>() {
+        UserAPI.userAPI.sendPut(us).enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(Call<UserModel> call, Response<UserModel> response) {
-                showToast("Cập nhật thành công");
-                UserModel us = response.body();
-                preferenceManager.clear();
-                preferenceManager.putBoolean(Constants.KEY_IS_SIGNED_IN, true);
-                preferenceManager.putString(Constants.KEY_USER_ID, us.getId().toString());
-                preferenceManager.putString(Constants.KEY_NAME, binding.inputName.getText().toString());
-                preferenceManager.putString(Constants.KEY_IMAGE, us.getUrl());
-                preferenceManager.putString(Constants.KEY_EMAIL,us.getEmail());
-                preferenceManager.putString(Constants.KEY_PASSWORD, us.getPassword());
-                LoadprofileUser();
-            }
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                ResponseBody responseBody = response.body();
+                try {
+                    String jsonString = responseBody.string();
+                    Gson gson = new GsonBuilder().create();
+                    JsonObject jsonObject = gson.fromJson(jsonString, JsonObject.class);
+                    Integer errCode = jsonObject.getAsJsonPrimitive("errCode").getAsInt();
+
+                    if(errCode == 0) {
+                        preferenceManager.clear();
+                        preferenceManager.putBoolean(Constants.KEY_IS_SIGNED_IN, true);
+                        preferenceManager.putString(Constants.KEY_USER_ID, String.valueOf(us.getId()));
+                        preferenceManager.putString(Constants.KEY_NAME, binding.inputName.getText().toString());
+                        preferenceManager.putString(Constants.KEY_IMAGE, us.getUrl());
+                        preferenceManager.putString(Constants.KEY_EMAIL,us.getEmail());
+                        showToast("Cập nhật thành công");
+                        LoadprofileUser();
+                    }else{
+                        showToast("Lỗi email đã tồn tại!");
+                        LoadprofileUser();
+                    }
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }}
             @Override
-            public void onFailure(Call<UserModel> call, Throwable t) {
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
                 showToast("Lỗi máy chủ");
             }
         });

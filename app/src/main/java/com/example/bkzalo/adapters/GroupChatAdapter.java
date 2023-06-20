@@ -93,8 +93,8 @@ public class GroupChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     @Override
     public int getItemViewType(int position) {
-        Long id = chatMessages.get(position).getId_nguoigui();
-        String sender = id.toString();
+        int id = chatMessages.get(position).getId_sender();
+        String sender = String.valueOf(id);
         int fileformat = chatMessages.get(position).getFileformat();
         if (sender.equals(senderId)) {
             if(fileformat == 1){
@@ -106,10 +106,10 @@ public class GroupChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         }
     }
     public String getImageUser(int position){
-        Long id = chatMessages.get(position).getId_nguoigui();
+        int id = chatMessages.get(position).getId_sender();
         String image = "";
         for(int i = 0 ; i< usersreceived.size(); i++){
-            if(usersreceived.get(i).getId().equals(id)){
+            if(usersreceived.get(i).getId()== id){
                 image = usersreceived.get(i).getUrl();
                 break;
             }
@@ -126,8 +126,8 @@ public class GroupChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         }
 
         void setData(Message chatMessage) {
-            binding.textMessage.setText(chatMessage.getNoidung());
-            binding.textDateTime.setText(chatMessage.getThoigiantao());
+            binding.textMessage.setText(chatMessage.getContent());
+            binding.textDateTime.setText(chatMessage.getCreateAt());
         }
     }
 
@@ -141,8 +141,8 @@ public class GroupChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         }
 
         void  setData(Message chatMessage, Bitmap receiverProfileImage) {
-            binding.textMessage.setText(chatMessage.getNoidung());
-            binding.textDateTime.setText(chatMessage.getThoigiantao());
+            binding.textMessage.setText(chatMessage.getContent());
+            binding.textDateTime.setText(chatMessage.getCreateAt());
             binding.imageProfile.setImageBitmap(receiverProfileImage);
         }
     }
@@ -160,10 +160,10 @@ public class GroupChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         }
 
         void setData(Message chatMessage) {
-            byte[] bytes = android.util.Base64.decode(chatMessage.getNoidung(), Base64.DEFAULT);
+            byte[] bytes = android.util.Base64.decode(chatMessage.getContent(), Base64.DEFAULT);
             Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
             binding.imgPreview.setImageBitmap(bitmap);
-            binding.textDateTime.setText(chatMessage.getThoigiantao());
+            binding.textDateTime.setText(chatMessage.getCreateAt());
         }
     }
     static class ReceivedImageViewHolder extends RecyclerView.ViewHolder {
@@ -176,10 +176,10 @@ public class GroupChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         }
 
         void  setData(Message chatMessage, Bitmap receiverProfileImage) {
-            byte[] bytes = android.util.Base64.decode(chatMessage.getNoidung(), Base64.DEFAULT);
+            byte[] bytes = android.util.Base64.decode(chatMessage.getContent(), Base64.DEFAULT);
             Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
             binding.imgPreview.setImageBitmap(bitmap);
-            binding.textDateTime.setText(chatMessage.getThoigiantao().toString());
+            binding.textDateTime.setText(chatMessage.getCreateAt().toString());
             binding.imageProfile.setImageBitmap(receiverProfileImage);
 
         }

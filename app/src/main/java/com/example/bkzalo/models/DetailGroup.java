@@ -5,55 +5,64 @@ import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 
 public class DetailGroup implements Serializable {
-    @SerializedName("id_nhomchat")
-    private Long id_nhomchat ;
-    @SerializedName("id_nguoidung")
-    private Long  id_nguoidung ;
-    @SerializedName("thoigianthamgia")
-    private String  thoigianthamgia  ;
-    @SerializedName("thoigianroikhoi")
-    private String thoigianroikhoi ;
-    @SerializedName("trangthai")
-    private int trangthai;
+    @SerializedName("id")
+    private int id ;
+    @SerializedName("id_groupchat")
+    private int id_groupchat ;
+    @SerializedName("id_user")
+    private int  id_user ;
+    @SerializedName("timejoin")
+    private String  timejoin  ;
+    @SerializedName("timeout")
+    private String timeout ;
+    @SerializedName("status")
+    private int status;
 
-    public int getTrangthai() {
-        return trangthai;
+    public int getId() {
+        return id;
     }
 
-    public void setTrangthai(int trangthai) {
-        this.trangthai = trangthai;
+    public void setId(int id) {
+        this.id = id;
     }
 
-    public Long getId_nhomchat() {
-        return id_nhomchat;
+    public int getId_groupchat() {
+        return id_groupchat;
     }
 
-    public void setId_nhomchat(Long id_nhomchat) {
-        this.id_nhomchat = id_nhomchat;
+    public void setId_groupchat(int id_groupchat) {
+        this.id_groupchat = id_groupchat;
     }
 
-    public Long getId_nguoidung() {
-        return id_nguoidung;
+    public int getId_user() {
+        return id_user;
     }
 
-    public void setId_nguoidung(Long id_nguoidung) {
-        this.id_nguoidung = id_nguoidung;
+    public void setId_user(int id_user) {
+        this.id_user = id_user;
     }
 
-    public String getThoigianthamgia() {
-        return thoigianthamgia;
+    public String getTimejoin() {
+        return timejoin;
     }
 
-    public void setThoigianthamgia(String thoigianthamgia) {
-        this.thoigianthamgia = thoigianthamgia;
+    public void setTimejoin(String timejoin) {
+        this.timejoin = timejoin;
     }
 
-    public String getThoigianroikhoi() {
-        return thoigianroikhoi;
+    public String getTimeout() {
+        return timeout;
     }
 
-    public void setThoigianroikhoi(String thoigianroikhoi) {
-        this.thoigianroikhoi = thoigianroikhoi;
+    public void setTimeout(String timeout) {
+        this.timeout = timeout;
     }
 
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
 }

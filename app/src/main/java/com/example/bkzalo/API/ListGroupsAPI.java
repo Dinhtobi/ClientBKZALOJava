@@ -8,6 +8,7 @@ import com.google.gson.GsonBuilder;
 
 import java.util.List;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -18,6 +19,6 @@ public interface ListGroupsAPI {
     Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
     ListGroupsAPI listGroupsApi = new Retrofit.Builder().baseUrl(Constants.KEY_API)
             .addConverterFactory(GsonConverterFactory.create(gson)).build().create(ListGroupsAPI.class);
-    @POST("Test-web/api-admin-listgroup")
-    Call<List<Group>> listgroup(@Body UserModel userModel);
+    @POST("/api/get-groupchat")
+    Call<ResponseBody> listgroup(@Body UserModel userModel);
 }

@@ -59,7 +59,7 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupViewHol
         }
 
         void setGroupData(Group group) {
-            binding.textName.setText(group.getTennhom());
+            binding.textName.setText(group.getNamegroup());
             binding.imageProfile.setImageBitmap(getUserImage(group.getImage()));
             binding.getRoot().setOnClickListener(v -> groupsListener.onGroupClicked(group));
         }

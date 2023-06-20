@@ -7,6 +7,7 @@ import com.google.gson.GsonBuilder;
 
 import java.util.List;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -18,6 +19,6 @@ public interface ListMessageAPI {
     ListMessageAPI listmessageapi = new Retrofit.Builder().baseUrl(Constants.KEY_API)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build().create(ListMessageAPI.class);
-    @POST("Test-web/api-admin-listmessage")
-    Call<List<Message>> ListMes(@Body Message chat);
+    @POST("/api/findid-message")
+    Call<ResponseBody> ListMes(@Body Message chat);
 }

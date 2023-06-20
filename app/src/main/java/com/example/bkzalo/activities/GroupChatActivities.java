@@ -15,6 +15,8 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.example.bkzalo.API.BoxMessageAPI;
+import com.example.bkzalo.API.GetUsersAPI;
+import com.example.bkzalo.API.ListBoxMessageAPI;
 import com.example.bkzalo.API.ListMemberGroupAPI;
 import com.example.bkzalo.API.ListMessageAPI;
 import com.example.bkzalo.API.MessageAPI;
@@ -27,10 +29,18 @@ import com.example.bkzalo.models.Group;
 import com.example.bkzalo.models.UserModel;
 import com.example.bkzalo.utilities.Constants;
 import com.example.bkzalo.utilities.PreferenceManager;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,6 +49,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -90,12 +101,12 @@ public class GroupChatActivities extends AppCompatActivity {
 
     private void sendMessage(int fileformat) {
         Message mes = new Message();
-        mes.setId_nguoigui(Long.parseLong(preferenceManager.getString(Constants.KEY_USER_ID)));
-        mes.setId_nhomchat(groupreceived.getId_nhomchat());
+        mes.setId_sender(Integer.parseInt(preferenceManager.getString(Constants.KEY_USER_ID)));
+        mes.setId_group(groupreceived.getId());
         Date dnow = new Date();
         SimpleDateFormat ft = new SimpleDateFormat("yyyy.MM.dd 'at' hh:mm:ss");
-        mes.setNoidung(binding.inputMessage.getText().toString());
-        mes.setThoigiantao(ft.format(dnow));
+        mes.setContent(binding.inputMessage.getText().toString());
+        mes.setCreateAt(ft.format(dnow));
         mes.setFileformat(fileformat);
         MessageAPI.messageAPI.SendChat(mes).enqueue(new Callback<Message>() {
             @Override
@@ -110,25 +121,25 @@ public class GroupChatActivities extends AppCompatActivity {
         });
         if (conversionId != null) {
             BoxLastMessage box = new BoxLastMessage() ;
-            box.setId_nguoigui(Long.parseLong(preferenceManager.getString(Constants.KEY_USER_ID)));
-            box.setId_hopchat(Long.parseLong(conversionId));
+            box.setId_sender(Integer.parseInt(preferenceManager.getString(Constants.KEY_USER_ID)));
+            box.setId(Integer.parseInt(conversionId));
             if(fileformat == 1){
-                box.setTinnhancuoi(preferenceManager.getString(Constants.KEY_NAME)+" Đã gửi 1 ảnh");
+                box.setLastmessage(preferenceManager.getString(Constants.KEY_NAME)+" Đã gửi 1 ảnh");
             }else{
-                box.setTinnhancuoi(binding.inputMessage.getText().toString());
+                box.setLastmessage(binding.inputMessage.getText().toString());
             }
-            box.setThoigiantao(ft.format(dnow));
+            box.setCreateAt(ft.format(dnow));
             updateConversion(box);
         }else {
             BoxLastMessage box = new BoxLastMessage();
-            box.setId_nguoigui(Long.parseLong(preferenceManager.getString(Constants.KEY_USER_ID)));
-            box.setId_nhomchat(groupreceived.getId_nhomchat());
+            box.setId_sender(Integer.parseInt(preferenceManager.getString(Constants.KEY_USER_ID)));
+            box.setId_groupchat(groupreceived.getId());
             if(fileformat == 1){
-                box.setTinnhancuoi(preferenceManager.getString(Constants.KEY_NAME)+" Đã gửi 1 ảnh");
+                box.setLastmessage(preferenceManager.getString(Constants.KEY_NAME)+" Đã gửi 1 ảnh");
             }else{
-                box.setTinnhancuoi(binding.inputMessage.getText().toString());
+                box.setLastmessage(binding.inputMessage.getText().toString());
             }
-            box.setThoigiantao(ft.format(dnow));
+            box.setCreateAt(ft.format(dnow));
             box.setType("Add");
             addConversion(box);
         }
@@ -136,38 +147,68 @@ public class GroupChatActivities extends AppCompatActivity {
     }
 
     private void listenAvailabilityOfReceiver() {
-        SetOnlineAPI.setOnlineapi.ListOnl().enqueue(new Callback<List<UserModel>>() {
+        GetUsersAPI.getuserapi.GetList("All").enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(Call<List<UserModel>> call, Response<List<UserModel>> response) {
-                List<UserModel> list = response.body();
-                groupreceived = (Group) getIntent().getSerializableExtra(Constants.KEY_GROUP);
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                ResponseBody responseBody = response.body();
+                try{
+                    String jsonString = responseBody.string();
+                    Gson gson = new GsonBuilder().create();
+                    JsonObject jsonObject = gson.fromJson(jsonString, JsonObject.class);
+                    JsonArray usersArray = jsonObject.getAsJsonArray("users");
+                    Type userListType = new TypeToken<List<UserModel>>(){}.getType();
+                    List<UserModel> userList = gson.fromJson(usersArray, userListType);
+                    groupreceived = (Group) getIntent().getSerializableExtra(Constants.KEY_GROUP);
+                    if(response.body() != null){
+                        ListMemberGroupAPI.listMemberGroupApi.listmember(groupreceived).enqueue(new Callback<ResponseBody>() {
+                            @Override
+                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                ResponseBody responseBody = response.body();
+                                try {
+                                    String jsonString = responseBody.string();
+                                    Gson gson = new GsonBuilder().create();
+                                    JsonObject jsonObject = gson.fromJson(jsonString, JsonObject.class);
+                                    List<UserModel> listuser;
+                                    JsonElement messageElement = jsonObject.get("users");
 
-                ListMemberGroupAPI.listMemberGroupApi.listmember(groupreceived).enqueue(new Callback<List<UserModel>>() {
-                    @Override
-                    public void onResponse(Call<List<UserModel>> call, Response<List<UserModel>> response) {
-                        List<UserModel> listuser = response.body();
-                            if(CheckOnl(list, listuser)){
-                                binding.textAvailability.setVisibility(View.VISIBLE);
+                                    if (messageElement != null && messageElement.isJsonArray()) {
+                                        JsonArray UserModelArray = messageElement.getAsJsonArray();
+                                        Type UserModelListType = new TypeToken<List<UserModel>>(){}.getType();
+                                        listuser = gson.fromJson(UserModelArray, UserModelListType);
+                                    } else {
+                                        listuser = new ArrayList<>(); // Hoặc giá trị mặc định tùy vào yêu cầu của bạn
+                                    }
+                                if(CheckOnl(userList, listuser)){
+                                    binding.textAvailability.setVisibility(View.VISIBLE);
+                                }
+                                else {
+                                    binding.textAvailability.setVisibility(View.GONE);
+                                } }catch (IOException e){
+                                    e.printStackTrace();
+                                }
                             }
-                            else {
-                                binding.textAvailability.setVisibility(View.GONE);
+                            @Override
+                            public void onFailure(Call<ResponseBody> call, Throwable t) {
+
                             }
+                        });
                     }
 
-                    @Override
-                    public void onFailure(Call<List<UserModel>> call, Throwable t) {
-
-                    }
-                });
+                }catch (IOException e) {
+                    e.printStackTrace();
+                }
 
             }
 
             @Override
-            public void onFailure(Call<List<UserModel>> call, Throwable t) {
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
 
             }
+
         });
     }
+
+
     private boolean CheckOnl(List<UserModel> listuser, List<UserModel> listmember){
         boolean onl = false;
         for(UserModel i : listuser){
@@ -175,7 +216,7 @@ public class GroupChatActivities extends AppCompatActivity {
                 break;
             }
             for(UserModel j : listmember){
-                if( i.getId().equals(j.getId()) && i.getTrangthai() == 1 && !j.getId().toString().equals(preferenceManager.getString(Constants.KEY_USER_ID)) ){
+                if( i.getId()== j.getId() && i.getStatus() == 1 && !String.valueOf(j.getId()).equals(preferenceManager.getString(Constants.KEY_USER_ID)) ){
                     onl = true;
                     break;
                 }
@@ -185,53 +226,90 @@ public class GroupChatActivities extends AppCompatActivity {
     }
     private void listenMessage() {
         Message mes = new Message();
-        mes.setId_nguoigui(Long.parseLong(preferenceManager.getString(Constants.KEY_USER_ID)));
-        mes.setId_nhomchat(groupreceived.getId_nhomchat());
-        ListMessageAPI.listmessageapi.ListMes(mes).enqueue(new Callback<List<Message>>() {
+        mes.setId_sender(Integer.parseInt(preferenceManager.getString(Constants.KEY_USER_ID)));
+        mes.setId_group(groupreceived.getId());
+        ListMessageAPI.listmessageapi.ListMes(mes).enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(Call<List<Message>> call, Response<List<Message>> response) {
-                List<Message> listchat = response.body();
-                sizesend = listchat.size();
-                eventListener(listchat);
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                ResponseBody responseBody = response.body();
+                try {
+                    String jsonString = responseBody.string();
+                    Gson gson = new GsonBuilder().create();
+                    JsonObject jsonObject = gson.fromJson(jsonString, JsonObject.class);
+                    JsonArray messagesArray = jsonObject.getAsJsonArray("message");
+                    Type messageListType = new TypeToken<List<Message>>(){}.getType();
+                    List<Message> listchat = gson.fromJson(messagesArray, messageListType);
+                    sizesend = listchat.size();
+                    eventListener(listchat);
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
             }
             @Override
-            public void onFailure(Call<List<Message>> call, Throwable t) {
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
                 showToast("Fail");
             }
         });
         groupreceived = (Group) getIntent().getSerializableExtra(Constants.KEY_GROUP);
         String currentUserId = preferenceManager.getString(Constants.KEY_USER_ID);
-        ListMemberGroupAPI.listMemberGroupApi.listmember(groupreceived).enqueue(new Callback<List<UserModel>>() {
+        ListMemberGroupAPI.listMemberGroupApi.listmember(groupreceived).enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(Call<List<UserModel>> call, Response<List<UserModel>> response) {
-                List<UserModel> list = response.body();
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                ResponseBody responseBody = response.body();
+                try {
+                    String jsonString = responseBody.string();
+                    Gson gson = new GsonBuilder().create();
+                    JsonObject jsonObject = gson.fromJson(jsonString, JsonObject.class);
+                    List<UserModel> list;
+                    JsonElement messageElement = jsonObject.get("users");
+
+                    if (messageElement != null && messageElement.isJsonArray()) {
+                        JsonArray UserModelArray = messageElement.getAsJsonArray();
+                        Type UserModelListType = new TypeToken<List<UserModel>>(){}.getType();
+                        list = gson.fromJson(UserModelArray, UserModelListType);
+                    } else {
+                        list = new ArrayList<>(); // Hoặc giá trị mặc định tùy vào yêu cầu của bạn
+                    }
                 for (UserModel i : list) {
-                    if (currentUserId.equals(i.getId().toString())) {
+                    if (currentUserId.equals(String.valueOf(i.getId()))) {
                         continue;
                     } else {
                         Message mes2 = new Message();
-                        mes2.setId_nguoigui(i.getId());
-                        mes2.setId_nhomchat(groupreceived.getId_nhomchat());
-                        ListMessageAPI.listmessageapi.ListMes(mes2).enqueue(new Callback<List<Message>>() {
+                        mes2.setId_sender(i.getId());
+                        mes2.setId_group(groupreceived.getId());
+                        ListMessageAPI.listmessageapi.ListMes(mes2).enqueue(new Callback<ResponseBody>() {
                             @Override
-                            public void onResponse(Call<List<Message>> call, Response<List<Message>> response) {
-                                List<Message> listchat = response.body();
-                                sizereceid += listchat.size();
-                                eventListener(listchat);
+                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                ResponseBody responseBody = response.body();
+                                try {
+                                    String jsonString = responseBody.string();
+                                    Gson gson = new GsonBuilder().create();
+                                    JsonObject jsonObject = gson.fromJson(jsonString, JsonObject.class);
+                                    JsonArray messagesArray = jsonObject.getAsJsonArray("message");
+                                    Type messageListType = new TypeToken<List<Message>>(){}.getType();
+                                    List<Message> listchat = gson.fromJson(messagesArray, messageListType);
+                                    sizesend = listchat.size();
+                                    eventListener(listchat);
+                                }catch (IOException e){
+                                    e.printStackTrace();
+                                }
                             }
 
                             @Override
-                            public void onFailure(Call<List<Message>> call, Throwable t) {
+                            public void onFailure(Call<ResponseBody> call, Throwable t) {
                                 showToast("Fail");
                             }
                         });
                     }
 
                 }
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
             }
 
             @Override
-            public void onFailure(Call<List<UserModel>> call, Throwable t) {
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
 
             }
         });
@@ -245,17 +323,17 @@ public class GroupChatActivities extends AppCompatActivity {
             if (chat != null) {
                 for (Message i : chat) {
                     Message chatMessage = new Message();
-                    chatMessage.setId_tinnhan(i.getId_tinnhan());
-                    chatMessage.setId_nguoigui(i.getId_nguoigui());
-                    chatMessage.setId_nguoinhan(i.getId_nguoinhan());
-                    chatMessage.setNoidung(i.getNoidung());
-                    chatMessage.setThoigiantao(i.getThoigiantao());
+                    chatMessage.setId(i.getId());
+                    chatMessage.setId_sender(i.getId_sender());
+                    chatMessage.setId_receiver(i.getId_receiver());
+                    chatMessage.setContent(i.getContent());
+                    chatMessage.setCreateAt(i.getCreateAt());
                     chatMessage.setFileformat(i.getFileformat());
                     if(CheckMes(chatMessage)){
                         chatMessages.add(chatMessage);
                     }
                 }
-                Collections.sort(chatMessages, (obj1, obj2) -> obj1.getThoigiantao().compareTo(obj2.getThoigiantao()));
+                Collections.sort(chatMessages, (obj1, obj2) -> obj1.getCreateAt().compareTo(obj2.getCreateAt()));
                 if (count == 0) {
                     groupChatAdapter.notifyDataSetChanged();
                 } else {
@@ -278,25 +356,42 @@ public class GroupChatActivities extends AppCompatActivity {
 
     private void loadUserReceive() {
         groupreceived = (Group) getIntent().getSerializableExtra(Constants.KEY_GROUP);
-        binding.textName.setText(groupreceived.getTennhom());
+        binding.textName.setText(groupreceived.getNamegroup());
         List<UserModel> listuser = new ArrayList<>();
-        ListMemberGroupAPI.listMemberGroupApi.listmember(groupreceived).enqueue(new Callback<List<UserModel>>() {
+        ListMemberGroupAPI.listMemberGroupApi.listmember(groupreceived).enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(Call<List<UserModel>> call, Response<List<UserModel>> response) {
-                List<UserModel> list = response.body();
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                ResponseBody responseBody = response.body();
+                try {
+                    String jsonString = responseBody.string();
+                    Gson gson = new GsonBuilder().create();
+                    JsonObject jsonObject = gson.fromJson(jsonString, JsonObject.class);
+                    List<UserModel> list;
+                    JsonElement messageElement = jsonObject.get("users");
+
+                    if (messageElement != null && messageElement.isJsonArray()) {
+                        JsonArray UserModelArray = messageElement.getAsJsonArray();
+                        Type UserModelListType = new TypeToken<List<UserModel>>(){}.getType();
+                        list = gson.fromJson(UserModelArray, UserModelListType);
+                    } else {
+                        list = new ArrayList<>(); // Hoặc giá trị mặc định tùy vào yêu cầu của bạn
+                    }
                 for(int i = 0 ; i<list.size(); i++){
                     UserModel newmember = new UserModel();
-                    newmember.setTen(list.get(i).getTen());
+                    newmember.setName(list.get(i).getName());
                     newmember.setId(list.get(i).getId());
                     newmember.setUrl(list.get(i).getUrl());
-                    newmember.setTrangthai(list.get(i).getTrangthai());
+                    newmember.setStatus(list.get(i).getStatus());
                     listuser.add(newmember);
                 }
                 groupChatAdapter.setData(listuser);
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
             }
 
             @Override
-            public void onFailure(Call<List<UserModel>> call, Throwable t) {
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
 
             }
         });
@@ -313,8 +408,10 @@ public class GroupChatActivities extends AppCompatActivity {
         });
     }
     private void Info(){
-        Intent intent = new Intent(getApplicationContext(), InfoGroup.class);
+        Intent intent = new Intent(getApplicationContext(), InfoGroupActivity.class);
         groupreceived = (Group) getIntent().getSerializableExtra(Constants.KEY_GROUP);
+        timer.cancel();
+        task.cancel();
         intent.putExtra(Constants.KEY_GROUP,  groupreceived);
         startActivity(intent);
     }
@@ -363,7 +460,7 @@ public class GroupChatActivities extends AppCompatActivity {
     private void  checkForConversion() {
         if (chatMessages.size() != 0) {
             checkForConversionRemotely(
-                    groupreceived.getId_nhomchat().toString()
+                    String.valueOf(groupreceived.getId())
             );
 
         }
@@ -371,17 +468,28 @@ public class GroupChatActivities extends AppCompatActivity {
 
     private void checkForConversionRemotely( String groupreceived) {
         BoxLastMessage last = new BoxLastMessage();
-        last.setId_nhomchat(Long.parseLong(groupreceived));
+        last.setId_groupchat(Integer.parseInt(groupreceived));
         last.setType("Check");
-        BoxMessageAPI.boxmessageAPI.converBox(last).enqueue(new Callback<BoxLastMessage>() {
+        ListBoxMessageAPI.listboxmessageAPI.ListBOX(last).enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(Call<BoxLastMessage> call, Response<BoxLastMessage> response) {
-                BoxLastMessage box = response.body();
-                conversion(box);
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if(response.body() != null){
+                    ResponseBody responseBody = response.body();
+                    try {
+                        String jsonString = responseBody.string();
+                        Gson gson = new GsonBuilder().create();
+                        JsonObject jsonObject = gson.fromJson(jsonString, JsonObject.class);
+                        BoxLastMessage box = gson.fromJson(jsonObject.getAsJsonObject("message"), BoxLastMessage.class);
+                        conversion(box);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
             }
 
             @Override
-            public void onFailure(Call<BoxLastMessage> call, Throwable t) {
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
                 showToast("Lỗi tải dữ liệu!");
             }
         });
@@ -390,7 +498,7 @@ public class GroupChatActivities extends AppCompatActivity {
     private final void  conversion(BoxLastMessage boxLastMessage){
         if (boxLastMessage != null) {
             BoxLastMessage box = boxLastMessage;
-            conversionId = box.getId_hopchat().toString();
+            conversionId = String.valueOf(box.getId());
         }
     };
 
@@ -406,7 +514,7 @@ public class GroupChatActivities extends AppCompatActivity {
     private boolean CheckMes(Message chat){
         boolean add = true ;
         for (int i = 0 ; i < chatMessages.size() ; i++){
-            if(chatMessages.get(i).getId_tinnhan() == chat.getId_tinnhan() ){
+            if(chatMessages.get(i).getId() == chat.getId() ){
                 add = false ;
                 break;
             }

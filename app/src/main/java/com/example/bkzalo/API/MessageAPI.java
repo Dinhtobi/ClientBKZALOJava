@@ -16,6 +16,6 @@ public interface MessageAPI {
     MessageAPI messageAPI = new Retrofit.Builder().baseUrl(Constants.KEY_API)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build().create(MessageAPI.class);
-    @POST("Test-web/api-admin-message")
+    @POST("/api/create-message")
     Call<Message> SendChat(@Body Message chat);
 }
